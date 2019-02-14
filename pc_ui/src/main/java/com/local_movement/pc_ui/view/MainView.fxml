@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox prefHeight="480.0" prefWidth="506.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.local_movement.pc_ui.view.MainViewController">
+   <children>
+      <AnchorPane prefHeight="75.0" prefWidth="600.0" VBox.vgrow="NEVER">
+         <children>
+            <GridPane hgap="5.0" prefHeight="90.0" prefWidth="398.0" vgap="5.0">
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="277.0" minWidth="-Infinity" prefWidth="139.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="277.0" minWidth="-Infinity" prefWidth="100.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="411.0" minWidth="10.0" prefWidth="159.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <Label text="Send file" underline="true">
+                     <padding>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </padding></Label>
+                  <TextField fx:id="destIPField" promptText="Destination IP" GridPane.rowIndex="1" />
+                  <Button mnemonicParsing="false" onAction="#selectSrcFileAction" text="Select file" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                  <Label fx:id="srcFileNameLabel" text="File name" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <Button mnemonicParsing="false" onAction="#sendFileAction" text="Send" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+               </children>
+            </GridPane>
+         </children>
+         <padding>
+            <Insets bottom="5.0" />
+         </padding>
+      </AnchorPane>
+      <SplitPane dividerPositions="0.37017994858611825" orientation="VERTICAL" prefHeight="252.0" prefWidth="576.0" VBox.vgrow="ALWAYS">
+         <items>
+            <VBox prefHeight="157.0" prefWidth="504.0" spacing="5.0">
+               <children>
+                  <GridPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="36.0" prefWidth="504.0">
+                     <columnConstraints>
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="246.0" minWidth="10.0" prefWidth="132.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="388.0" minWidth="10.0" prefWidth="372.0" />
+                     </columnConstraints>
+                     <rowConstraints>
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                     </rowConstraints>
+                     <children>
+                        <ToolBar fx:id="reciveTool" prefHeight="40.0" prefWidth="200.0" GridPane.columnIndex="1">
+                           <items>
+                              <Button mnemonicParsing="false" onAction="#moveToMovementAction" text="Move" />
+                              <Button mnemonicParsing="false" onAction="#denialFromReceiveAction" text="Denial" />
+                           </items>
+                        </ToolBar>
+                        <Label text="Receive table" underline="true">
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
+                        </Label>
+                     </children>
+                  </GridPane>
+                  <TableView fx:id="receiveTable" prefHeight="107.0" prefWidth="504.0" VBox.vgrow="ALWAYS">
+                     <columns>
+                        <TableColumn prefWidth="75.0" text="From IP" />
+                        <TableColumn prefWidth="75.0" text="Login" />
+                        <TableColumn prefWidth="93.0" text="File name" />
+                        <TableColumn prefWidth="84.0" text="Sise" />
+                     </columns>
+                  </TableView>
+               </children>
+               <padding>
+                  <Insets top="5.0" />
+               </padding>
+            </VBox>
+            <VBox prefHeight="157.0" prefWidth="613.0" spacing="5.0">
+               <children>
+                  <GridPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="36.0" prefWidth="504.0">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="244.0" minWidth="10.0" prefWidth="153.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="370.0" minWidth="10.0" prefWidth="351.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <Label text="Movement table" underline="true">
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
+                        </Label>
+                        <ToolBar fx:id="movementTool" prefHeight="38.0" prefWidth="249.0" GridPane.columnIndex="1">
+                           <items>
+                              <Button mnemonicParsing="false" onAction="#continueMovementAction" text="Continue" />
+                              <Button mnemonicParsing="false" onAction="#pauseMovementAction" text="Pause" />
+                              <Button mnemonicParsing="false" onAction="#denialFromMovementAction" text="Denial" />
+                           </items>
+                        </ToolBar>
+                     </children>
+                  </GridPane>
+                  <TableView fx:id="movementTable" prefHeight="183.0" prefWidth="504.0" VBox.vgrow="ALWAYS">
+                     <columns>
+                        <TableColumn prefWidth="75.0" text="Name" />
+                        <TableColumn prefWidth="75.0" text="Status" />
+                        <TableColumn prefWidth="75.0" text="Sise" />
+                        <TableColumn prefWidth="75.0" text="Moved" />
+                        <TableColumn prefWidth="75.0" text="Bar" />
+                     </columns>
+                  </TableView>
+               </children>
+               <padding>
+                  <Insets top="5.0" />
+               </padding>
+            </VBox>
+         </items>
+      </SplitPane>
+   </children>
+</VBox>
