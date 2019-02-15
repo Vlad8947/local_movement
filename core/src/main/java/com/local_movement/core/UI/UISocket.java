@@ -1,4 +1,4 @@
-package com.local_movement.core.UI;
+package com.local_movement.core.ui;
 
 import java.nio.channels.SocketChannel;
 

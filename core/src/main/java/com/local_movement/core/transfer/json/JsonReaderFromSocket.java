@@ -2,7 +2,7 @@ package com.local_movement.core.transfer.json;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.local_movement.core.AppProperties;
-import com.local_movement.core.UI.UIConnector;
+import com.local_movement.core.ui.UIConnector;
 import com.local_movement.core.transfer.json.json_entity.AbstractJson;
 import com.local_movement.core.transfer.json.json_entity.FileProperties;
 import com.local_movement.core.transfer.json.json_entity.JsonType;

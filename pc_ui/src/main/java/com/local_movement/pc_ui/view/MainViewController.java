@@ -1,72 +1,33 @@
 package com.local_movement.pc_ui.view;
 
-import com.local_movement.pc_ui.model.MovementData;
-import com.local_movement.pc_ui.model.ReceiveData;
+import com.local_movement.core.ui.data.PossibleInterfaceData;
+import com.local_movement.core.ui.model.PossibleInterface;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToolBar;
 
 public class MainViewController {
 
-    @FXML
-    private TextField destIPField;
-    @FXML
-    private Label srcFileNameLabel;
-
-    @FXML
-    private TableView<ReceiveData> receiveTable;
-    @FXML
-    private ToolBar reciveTool;
-
-    @FXML
-    private TableView<MovementData> movementTable;
-    @FXML
-    private ToolBar movementTool;
+    @FXML private TableView<PossibleInterface> possibleTableView;
+    @FXML private TableColumn<PossibleInterface, String> interfaceNameColumn;
+    @FXML private TableColumn<PossibleInterface, String> interfaceIpColumn;
+    @FXML private Tab sendFileTab;
+    @FXML private Tab receiveFileTab;
 
     public MainViewController() {
     }
 
     @FXML
-    private void initialize(){
-
+    private void initialize() {
+        initializePossibleTable();
     }
 
-
-    @FXML
-    private void selectSrcFileAction() {
-
-    }
-
-    @FXML
-    private void sendFileAction() {
-
-    }
-
-    @FXML
-    private void moveToMovementAction() {
-
-    }
-
-    @FXML
-    private void denialFromReceiveAction() {
-
-    }
-
-    @FXML
-    private void continueMovementAction() {
-
-    }
-
-    @FXML
-    private void pauseMovementAction() {
-
-    }
-
-    @FXML
-    private void denialFromMovementAction() {
-
+    private void initializePossibleTable() {
+        interfaceNameColumn.setCellValueFactory(cellData -> cellData.getValue().getName());
+        interfaceIpColumn.setCellValueFactory(cellData -> cellData.getValue().getIp());
+        possibleTableView.setItems(PossibleInterfaceData.getObservableList());
     }
 
 }
