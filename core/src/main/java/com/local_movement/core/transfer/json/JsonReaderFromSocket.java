@@ -37,7 +37,7 @@ public class JsonReaderFromSocket {
 
 
     public static byte[] readBytes(SocketChannel clientSocket) throws IOException {
-        ByteBuffer buffer = ByteBuffer.allocate(AppProperties.getJsonBufferSize());
+        ByteBuffer buffer = ByteBuffer.allocate(AppProperties.getBufferSize());
         int byteAmount = 0;
         byte[] bytes = new byte[0];
         while ((byteAmount = clientSocket.read(buffer)) > 0) {

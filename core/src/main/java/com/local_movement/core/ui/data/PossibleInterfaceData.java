@@ -16,6 +16,10 @@ public class PossibleInterfaceData {
     @Getter
     private static ObservableList<PossibleInterface> observableList = FXCollections.observableArrayList();
 
+    static {
+        update();
+    }
+
     public static void update() {
         observableList.clear();
         try {
@@ -28,14 +32,13 @@ public class PossibleInterfaceData {
                         networkInterface.isPointToPoint()) {
                     continue;
                 }
-
                 Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
                 while(addresses.hasMoreElements()) {
                     InetAddress address = addresses.nextElement();
-                    if(Inet4Address.class == address.getClass()) {
-                        PossibleInterface possibleInterface =
-                                new PossibleInterface(networkInterface.getName(), address.getHostAddress());
-                        observableList.add(possibleInterface);
+                    if(address.getClass() == Inet4Address.class) {
+                        observableList.add(
+                                new PossibleInterface(networkInterface.getName(), address.getHostAddress())
+                        );
                     }
                 }
             }
