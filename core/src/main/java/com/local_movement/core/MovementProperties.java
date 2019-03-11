@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.nio.channels.FileChannel;
+import java.io.File;
 import java.nio.channels.SocketChannel;
 
 @Getter
@@ -13,12 +13,20 @@ import java.nio.channels.SocketChannel;
 @ToString
 public class MovementProperties {
 
-    private SocketChannel socketChannel;
-    @Setter private FileChannel fileChannel;
+    private String address;
+    @Setter private SocketChannel socketChannel;
+    @Setter private File file;
     private FileProperties fileProperties;
     private MovementType type;
 
-    public MovementProperties(SocketChannel socketChannel, FileProperties fileProperties, MovementType type) {
+    public MovementProperties(String address, FileProperties fileProperties, MovementType type) {
+        this.address = address;
+        this.fileProperties = fileProperties;
+        this.type = type;
+    }
+
+    public MovementProperties(String address, SocketChannel socketChannel, FileProperties fileProperties, MovementType type) {
+        this.address = address;
         this.socketChannel = socketChannel;
         this.fileProperties = fileProperties;
         this.type = type;
