@@ -24,9 +24,7 @@ public class ReceiveConnectionModel {
         this.movementProperties = movementProperties;
         FileProperties fileProperties = movementProperties.getFileProperties();
         userName.setValue(fileProperties.getUserName());
-        address.setValue(
-                ((InetSocketAddress) movementProperties.getSocketChannel().getRemoteAddress())
-                        .getAddress().getHostAddress());
+        address.setValue(movementProperties.getAddress());
         fileName.setValue(fileProperties.getFileName());
     }
 }

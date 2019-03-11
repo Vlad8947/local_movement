@@ -2,9 +2,10 @@ package com.local_movement.core;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
-@Getter
+@Getter@Setter
 @EqualsAndHashCode
 @ToString
 public class FileProperties {
@@ -16,9 +17,9 @@ public class FileProperties {
     private FileProperties() {
     }
 
-    public FileProperties(String userName, String fileName, long fileSize) {
+    public FileProperties(String userName, String fileName, long fileLength) {
         this.userName = userName;
         this.fileName = fileName;
-        this.fileSize = fileSize;
+        this.fileSize = fileLength;
     }
 }
