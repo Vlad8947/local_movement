@@ -1,7 +1,6 @@
 package com.local_movement.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Getter;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -10,20 +9,27 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
-import java.util.List;
+import java.util.concurrent.RecursiveAction;
 
-public class ConnectionsReceiver implements Closeable {
+public class ConnectionsReceiver extends RecursiveAction implements Closeable {
 
-    private ServerSocketChannel server;
-    private boolean closed = false;
-    private ObjectMapper objectMapper = new ObjectMapper();
-    @Getter private List<MovementProperties> movementList;
-
-    public ConnectionsReceiver(List<MovementProperties> movementList) {
-        this.movementList = movementList;
+    public interface MovementPropAdder {
+        void add (MovementProperties movementProperties) throws IOException;
     }
 
-    public void receiveConnection() {
+    private ServerSocketChannel server;
+    private ByteBuffer dataBuffer = ByteBuffer.allocate(AppProperties.getBufferLength());
+    private ByteBuffer messageBuffer = ByteBuffer.allocate(Message.LENGTH);
+    private boolean closed = false;
+    private ObjectMapper objectMapper = new ObjectMapper();
+    private MovementPropAdder movementPropAdder;
+
+    public ConnectionsReceiver(MovementPropAdder movementPropAdder) {
+        this.movementPropAdder = movementPropAdder;
+    }
+
+    @Override
+    public void compute() {
         try (ServerSocketChannel server = ServerSocketChannel.open()) {
             this.server = server;
             server.bind(new InetSocketAddress(AppProperties.getPort()));
@@ -32,8 +38,10 @@ public class ConnectionsReceiver implements Closeable {
                 SocketChannel socketChannel = server.accept();
                 try {
                     FileProperties fileProperties = receiveFileProperties(socketChannel);
-                    movementList.add(
-                            new MovementProperties(socketChannel, fileProperties, MovementType.RECEIVE)
+                    String address = ((InetSocketAddress) socketChannel.getRemoteAddress())
+                            .getAddress().getHostAddress();
+                    movementPropAdder.add(
+                            new MovementProperties(address, socketChannel, fileProperties, MovementType.RECEIVE)
                     );
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -47,16 +55,13 @@ public class ConnectionsReceiver implements Closeable {
     }
 
     private FileProperties receiveFileProperties(SocketChannel socketChannel) throws IOException {
-        ByteBuffer dataBuffer = ByteBuffer.allocate(AppProperties.getBufferSize());
-        ByteBuffer messageBuffer = ByteBuffer.allocate(Message.SIZE);
         byte[] message;
         byte[] data = new byte[0];
         int dataPosition;
 
         do {
-            message = Message.read(socketChannel, messageBuffer);
-            dataBuffer.clear();
-            socketChannel.read(dataBuffer);
+            message = SocketTransfer.clearReadGet(socketChannel, messageBuffer);
+            SocketTransfer.clearReadFlip(socketChannel, dataBuffer);
             dataPosition = data.length;
             data = Arrays.copyOf(data, data.length + dataBuffer.limit());
             System.arraycopy(dataBuffer.array(), 0, data, dataPosition, dataBuffer.limit());

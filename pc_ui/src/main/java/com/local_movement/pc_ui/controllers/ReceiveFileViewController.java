@@ -1,5 +1,7 @@
 package com.local_movement.pc_ui.controllers;
 
+import com.local_movement.core.ConnectionsReceiver;
+import com.local_movement.core.MovementProperties;
 import com.local_movement.pc_ui.model.ReceiveConnectionModel;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -7,17 +9,20 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 
-public class ReceiveFileViewController {
+import java.io.IOException;
+
+public class ReceiveFileViewController implements ConnectionsReceiver.MovementPropAdder {
 
     private final String receiveConnectionsText = "Receive connections";
     private final String cancelReceiveConnectionsText = "Cancel receive connections";
+
+    private ObservableList<ReceiveConnectionModel> connectionList = FXCollections.observableArrayList();
+    private ConnectionsReceiver connectionsReceiver;
 
     @FXML private Button receiveConnectionsOrCancelButton;
     @FXML private Label waitingLabel;
 
     @FXML private VBox chooseConnectionVBox;
-    private ObservableList<ReceiveConnectionModel> connectionList =
-            FXCollections.observableArrayList();
     @FXML private TableView<ReceiveConnectionModel> connectionTable;
     @FXML private TableColumn<ReceiveConnectionModel, String> userNameColumn;
     @FXML private TableColumn<ReceiveConnectionModel, String> addressColumn;
@@ -45,15 +50,14 @@ public class ReceiveFileViewController {
         connectionTable.setItems(connectionList);
     }
 
-    //todo
     private void receiveConnectionsAction() {
-
+        connectionsReceiver = new ConnectionsReceiver(this);
+        connectionsReceiver.fork();
         receiveConnectionsPhase();
     }
 
-    //todo
     private void cancelReceiveConnectionsAction() {
-
+        connectionsReceiver.close();
         notReceiveConnectionsPhase();
     }
 
@@ -65,10 +69,15 @@ public class ReceiveFileViewController {
     }
 
     private void notReceiveConnectionsPhase() {
+        connectionList.clear();
         waitingLabel.setVisible(false);
         chooseConnectionVBox.setDisable(true);
         receiveConnectionsOrCancelButton.setText(receiveConnectionsText);
         receiveConnectionsOrCancelButton.setOnAction(event -> receiveConnectionsAction());
     }
 
+    @Override
+    public void add(MovementProperties movementProperties) throws IOException {
+        connectionList.add(new ReceiveConnectionModel(movementProperties));
+    }
 }
