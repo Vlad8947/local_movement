@@ -28,7 +28,7 @@
                </rowConstraints>
                <children>
                   <Label text="Destination IP:" underline="true" GridPane.rowIndex="1" />
-                  <TextField fx:id="addressTextField" maxHeight="-Infinity" maxWidth="-Infinity" promptText="192.168.0.5" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <TextField fx:id="addressField" maxHeight="-Infinity" maxWidth="-Infinity" promptText="192.168.0.5" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <Label text="File:" underline="true" GridPane.rowIndex="2" />
                   <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                      <children>
@@ -36,7 +36,7 @@
                         <Label fx:id="filePathLabel" text="None" />
                      </children>
                   </HBox>
-                  <Button fx:id="sendFileButton" mnemonicParsing="false" text="Send file" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                  <Button fx:id="sendButton" mnemonicParsing="false" text="Send file" GridPane.columnIndex="1" GridPane.rowIndex="3" />
                   <Label text="You'r username" underline="true" />
                   <TextField fx:id="userNameField" promptText="roy1995" GridPane.columnIndex="1" />
                </children>
