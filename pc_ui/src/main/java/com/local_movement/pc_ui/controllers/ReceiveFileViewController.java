@@ -1,7 +1,7 @@
 package com.local_movement.pc_ui.controllers;
 
-import com.local_movement.core.ConnectionsReceiver;
-import com.local_movement.core.MovementProperties;
+import com.local_movement.core.transfer.ConnectionsReceiver;
+import com.local_movement.core.model.MovementProperties;
 import com.local_movement.pc_ui.model.ReceiveConnectionModel;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -40,6 +40,22 @@ public class ReceiveFileViewController implements ConnectionsReceiver.MovementPr
     private void initialize() {
         notReceiveConnectionsPhase();
         connectionTableInit();
+        buttonsInit();
+    }
+
+    private void buttonsInit() {
+        receiveFileButton.setOnAction(event -> receiveFileAction());
+        cancelConnButton.setOnAction(event -> cancelConnectionAction());
+    }
+
+    private void receiveFileAction() {
+        int connectionIndex = connectionTable.getSelectionModel().getSelectedIndex();
+        MovementProperties movementProperties = connectionList.get(connectionIndex).getMovementProperties();
+
+    }
+
+    private void cancelConnectionAction() {
+
     }
 
     private void connectionTableInit() {
