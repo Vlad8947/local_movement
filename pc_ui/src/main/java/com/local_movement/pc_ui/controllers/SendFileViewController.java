@@ -1,9 +1,10 @@
 package com.local_movement.pc_ui.controllers;
 
-import com.local_movement.core.FileProperties;
-import com.local_movement.core.MovementProperties;
-import com.local_movement.core.MovementType;
-import com.local_movement.core.Sender;
+import com.local_movement.core.model.FileProperties;
+import com.local_movement.core.model.MovementProperties;
+import com.local_movement.core.model.MovementType;
+import com.local_movement.core.transfer.Sender;
+import com.local_movement.pc_ui.Dialog;
 import com.local_movement.pc_ui.MainApp;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -15,12 +16,14 @@ import java.io.File;
 
 public class SendFileViewController {
 
-    @FXML private TextField addressTextField;
+    private String noneText = "None";
+    private File file;
+
+    @FXML private TextField userNameField;
+    @FXML private TextField addressField;
     @FXML private Button selectFileButton;
     @FXML private Label filePathLabel;
-    @FXML private Button sendFileButton;
-    @FXML private TextField userNameField;
-    private File file;
+    @FXML private Button sendButton;
 
     public SendFileViewController() {
     }
@@ -32,19 +35,32 @@ public class SendFileViewController {
 
     private void initButtons() {
         selectFileButton.setOnAction(event -> chooseFileAction());
-        sendFileButton.setOnAction(event -> sendFileAction());
+        sendButton.setOnAction(event -> sendAction());
     }
 
     private void chooseFileAction() {
         file = MainApp.chooseFile();
-        filePathLabel.setText(file.getPath());
+        String fileName;
+        if (file == null) {
+            fileName = noneText;
+        } else {
+            fileName = file.getPath();
+        }
+        filePathLabel.setText(fileName);
     }
 
-    private void sendFileAction() {
+    private void sendAction() {
+        if (userNameField.getText().isEmpty() || addressField.getText().isEmpty() || file == null) {
+            String title = "Send file error";
+            String header = "The field(s) is empty!";
+            Dialog.error(title, header, null);
+            return;
+        }
+
         FileProperties fileProperties = new FileProperties(userNameField.getText(), file.getName(), file.length());
         MovementProperties movementProperties =
-                new MovementProperties(addressTextField.getText(), fileProperties, MovementType.SEND);
-        Sender sender = new Sender(movementProperties);
+                new MovementProperties(addressField.getText(), file, fileProperties, MovementType.SEND);
+        Sender sender = new Sender(movementProperties, Dialog::error);
         sender.fork();
     }
 
