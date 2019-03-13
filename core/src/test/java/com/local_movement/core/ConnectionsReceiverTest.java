@@ -1,6 +1,11 @@
 package com.local_movement.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.local_movement.core.model.FileProperties;
+import com.local_movement.core.model.MovementProperties;
+import com.local_movement.core.transfer.ConnectionsReceiver;
+import com.local_movement.core.transfer.Message;
+import com.local_movement.core.transfer.SocketTransfer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

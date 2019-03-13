@@ -1,14 +1,12 @@
 package com.local_movement.pc_ui.model;
 
-import com.local_movement.core.FileProperties;
-import com.local_movement.core.MovementProperties;
+import com.local_movement.core.model.FileProperties;
+import com.local_movement.core.model.MovementProperties;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import lombok.Getter;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 
 @Getter
 public class ReceiveConnectionModel {

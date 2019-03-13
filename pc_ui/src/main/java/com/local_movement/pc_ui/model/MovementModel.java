@@ -1,6 +1,6 @@
 package com.local_movement.pc_ui.model;
 
-import com.local_movement.core.MovementType;
+import com.local_movement.core.model.MovementType;
 import com.local_movement.core.SizeConverter;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;

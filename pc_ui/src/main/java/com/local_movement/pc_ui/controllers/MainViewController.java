@@ -1,6 +1,6 @@
 package com.local_movement.pc_ui.controllers;
 
-import com.local_movement.core.possible_network_interface.NetworkInterfaceFinder;
+import com.local_movement.core.network.NetworkInterfaceFinder;
 import com.local_movement.pc_ui.MainApp;
 import com.local_movement.pc_ui.model.PossibleNetInterfaceModel;
 import javafx.collections.FXCollections;
