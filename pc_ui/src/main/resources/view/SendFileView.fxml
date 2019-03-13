@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.local_movement.pc_ui.controllers.SendFileViewController">
+<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.local_movement.pc_ui.controllers.SendFileViewController">
    <children>
       <VBox alignment="TOP_CENTER" layoutX="10.0" layoutY="10.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" spacing="20.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <children>
@@ -27,13 +27,15 @@
                   <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                </rowConstraints>
                <children>
+                  <Label text="You'r username" underline="true" />
+                  <TextField fx:id="userNameField" maxHeight="-Infinity" maxWidth="-Infinity" promptText="roy1995" GridPane.columnIndex="1" />
                   <Label text="Destination IP:" underline="true" GridPane.rowIndex="1" />
                   <TextField fx:id="addressField" maxHeight="-Infinity" maxWidth="-Infinity" promptText="192.168.0.5" GridPane.columnIndex="1" GridPane.rowIndex="1" />
                   <Label text="File:" underline="true" GridPane.rowIndex="2" />
                   <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                      <children>
                         <Button fx:id="selectFileButton" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" text="Select file" />
-                        <Label fx:id="filePathLabel" text="None" />
+                        <Label fx:id="filePathLabel" maxHeight="-Infinity" text="None" />
                      </children>
                   </HBox>
                   <Button fx:id="sendButton" mnemonicParsing="false" text="Send file" GridPane.columnIndex="1" GridPane.rowIndex="3" />
