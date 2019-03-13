@@ -1,4 +1,4 @@
-package com.local_movement.core;
+package com.local_movement.core.model;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

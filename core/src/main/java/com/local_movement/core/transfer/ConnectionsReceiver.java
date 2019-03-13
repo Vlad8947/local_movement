@@ -1,6 +1,10 @@
-package com.local_movement.core;
+package com.local_movement.core.transfer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.local_movement.core.*;
+import com.local_movement.core.model.FileProperties;
+import com.local_movement.core.model.MovementProperties;
+import com.local_movement.core.model.MovementType;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -38,10 +42,9 @@ public class ConnectionsReceiver extends RecursiveAction implements Closeable {
                 SocketChannel socketChannel = server.accept();
                 try {
                     FileProperties fileProperties = receiveFileProperties(socketChannel);
-                    String address = ((InetSocketAddress) socketChannel.getRemoteAddress())
-                            .getAddress().getHostAddress();
+                    InetSocketAddress inetAddress = (InetSocketAddress) socketChannel.getRemoteAddress();
                     movementPropAdder.add(
-                            new MovementProperties(address, socketChannel, fileProperties, MovementType.RECEIVE)
+                            new MovementProperties(inetAddress, socketChannel, fileProperties, MovementType.RECEIVE)
                     );
                 } catch (IOException e) {
                     e.printStackTrace();

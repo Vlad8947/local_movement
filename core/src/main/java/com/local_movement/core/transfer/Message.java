@@ -1,4 +1,4 @@
-package com.local_movement.core;
+package com.local_movement.core.transfer;
 
 public class Message {
 

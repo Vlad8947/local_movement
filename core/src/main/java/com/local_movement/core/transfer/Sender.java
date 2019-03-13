@@ -1,11 +1,13 @@
-package com.local_movement.core;
+package com.local_movement.core.transfer;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.local_movement.core.*;
+import com.local_movement.core.model.MovementProperties;
+import sun.nio.ch.Net;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
@@ -17,27 +19,47 @@ public class Sender extends RecursiveAction implements Closeable {
     private ByteBuffer messageBuffer = ByteBuffer.allocate(Message.LENGTH);
     private ByteBuffer buffer = ByteBuffer.allocate(AppProperties.getBufferLength());
     private SocketChannel socketChannel;
+    private DialogInterface dialog;
+    private String errorTitle = "Send file error";
 
-    public Sender(MovementProperties movementProperties) {
+
+    public Sender(MovementProperties movementProperties, DialogInterface dialog) {
         this.movementProperties = movementProperties;
+        this.dialog = dialog;
     }
 
     @Override
     protected void compute() {
         try (SocketChannel socketChannel = SocketChannel.open();) {
             this.socketChannel = socketChannel;
-            InetSocketAddress address =
-                    new InetSocketAddress(movementProperties.getAddress(), AppProperties.getPort());
-            socketChannel.connect(address);
-            sendFileProperties();
+            try {
+                Net.checkAddress(movementProperties.getInetAddress());
+            } catch (Exception e) {
+                String header = "Error! Invalid address";
+                dialog.error(errorTitle, header, null);
+                return;
+            }
+            try {
+                socketChannel.connect(movementProperties.getInetAddress());
+            } catch (Exception e) {
+                String header = "Error! Connection error";
+                dialog.error(errorTitle, header, null);
+                return;
+            }
+            try {
+                sendFileProperties();
+            } catch (Exception e) {
+                String header = "Error! Send file properties error";
+                dialog.error(errorTitle, header, null);
+                return;
+            }
 
             synchronized (this) {
                 this.wait(500);
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
     @Override

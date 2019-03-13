@@ -1,4 +1,4 @@
-package com.local_movement.core;
+package com.local_movement.core.transfer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -8,8 +8,7 @@ public class SocketTransfer {
 
     public static void clearRead(SocketChannel socketChannel, ByteBuffer buffer) throws IOException {
         buffer.clear();
-
-        System.out.println(socketChannel.read(buffer));
+        socketChannel.read(buffer);
     }
 
     public static void clearReadFlip(SocketChannel socketChannel, ByteBuffer buffer) throws IOException {
