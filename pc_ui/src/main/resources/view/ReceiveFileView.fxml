@@ -46,9 +46,9 @@
                   </Label>
                   <TableView fx:id="connectionTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
                      <columns>
-                        <TableColumn fx:id="userNameColumn" prefWidth="110.0" text="User name" />
+                        <TableColumn fx:id="userNameColumn" prefWidth="110.0" text="User netInterfaceName" />
                         <TableColumn fx:id="addressColumn" prefWidth="123.0" text="IP-address" />
-                        <TableColumn fx:id="fileNameColumn" prefWidth="157.0" text="File name" />
+                        <TableColumn fx:id="fileNameColumn" prefWidth="157.0" text="File netInterfaceName" />
                         <TableColumn fx:id="sizeColumn" minWidth="0.0" prefWidth="88.0" text="Size" />
                      </columns>
                   </TableView>

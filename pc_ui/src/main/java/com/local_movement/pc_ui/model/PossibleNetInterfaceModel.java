@@ -10,11 +10,11 @@ import lombok.Setter;
 @EqualsAndHashCode
 public class PossibleNetInterfaceModel {
 
-    private StringProperty name = new SimpleStringProperty();
+    private StringProperty netInterfaceName = new SimpleStringProperty();
     private StringProperty ip = new SimpleStringProperty();
 
-    public PossibleNetInterfaceModel(String name, String ip) {
-        this.name.setValue(name);
+    public PossibleNetInterfaceModel(String netInterfaceName, String ip) {
+        this.netInterfaceName.setValue(netInterfaceName);
         this.ip.setValue(ip);
     }
 }
