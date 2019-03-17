@@ -23,12 +23,22 @@ import static org.junit.jupiter.api.Assertions.*;
 class ConnectionsReceiverTest {
 
     private ConnectionsReceiver connectionsReceiver;
-    List<MovementProperties> movementList;
+    private List<MovementProperties> movementList;
+    private MovementPropListAdapter adder = new MovementPropListAdapter() {
+        @Override
+        public void add(MovementProperties movementProperties) throws IOException {
+            movementList.add(movementProperties);
+        }
+
+        @Override
+        public void remove(MovementProperties movementProperties) {
+            movementList.remove(movementProperties);
+        }
+    };
 
     @BeforeEach
     void setUp() {
         movementList = new ArrayList<>();
-        ConnectionsReceiver.MovementPropAdder adder = movementList::add;
         connectionsReceiver = new ConnectionsReceiver(adder);
     }
 
@@ -72,7 +82,6 @@ class ConnectionsReceiverTest {
                 }
             }
             FileProperties expectedFileProp = movementList.get(first).getFileProperties();
-            System.out.println(expectedFileProp);
             assertEquals(expectedFileProp, originalFileProp);
 
         } catch (IOException e) {
