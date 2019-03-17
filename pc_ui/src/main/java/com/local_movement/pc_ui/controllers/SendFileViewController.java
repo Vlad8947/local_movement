@@ -4,6 +4,7 @@ import com.local_movement.core.model.FileProperties;
 import com.local_movement.core.model.MovementProperties;
 import com.local_movement.core.model.MovementType;
 import com.local_movement.core.transfer.Sender;
+import com.local_movement.pc_ui.Chooser;
 import com.local_movement.pc_ui.Dialog;
 import com.local_movement.pc_ui.MainApp;
 import javafx.fxml.FXML;
@@ -16,7 +17,7 @@ import java.io.File;
 
 public class SendFileViewController {
 
-    private String noneText = "None";
+    private Dialog dialog = Dialog.getInstance();
     private File file;
 
     @FXML private TextField userNameField;
@@ -39,28 +40,26 @@ public class SendFileViewController {
     }
 
     private void chooseFileAction() {
-        file = MainApp.chooseFile();
-        String fileName;
-        if (file == null) {
-            fileName = noneText;
-        } else {
-            fileName = file.getPath();
+        File newFile = Chooser.chooseFile();
+        if (newFile == null) {
+            return;
         }
-        filePathLabel.setText(fileName);
+        file = newFile;
+        filePathLabel.setText(file.getPath());
     }
 
     private void sendAction() {
         if (userNameField.getText().isEmpty() || addressField.getText().isEmpty() || file == null) {
             String title = "Send file error";
             String header = "The field(s) is empty!";
-            Dialog.error(title, header, null);
+            dialog.error(title, header, null);
             return;
         }
 
         FileProperties fileProperties = new FileProperties(userNameField.getText(), file.getName(), file.length());
         MovementProperties movementProperties =
                 new MovementProperties(addressField.getText(), file, fileProperties, MovementType.SEND);
-        Sender sender = new Sender(movementProperties, Dialog::error);
+        Sender sender = new Sender(movementProperties, dialog);
         sender.fork();
     }
 
