@@ -12,7 +12,7 @@ public class FileProperties {
 
     private String userName;
     private String fileName;
-    private long fileSize;
+    private long fileLength;
 
     private FileProperties() {
     }
@@ -20,6 +20,6 @@ public class FileProperties {
     public FileProperties(String userName, String fileName, long fileLength) {
         this.userName = userName;
         this.fileName = fileName;
-        this.fileSize = fileLength;
+        this.fileLength = fileLength;
     }
 }
