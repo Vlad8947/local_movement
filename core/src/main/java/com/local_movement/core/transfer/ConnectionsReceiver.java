@@ -17,18 +17,14 @@ import java.util.concurrent.RecursiveAction;
 
 public class ConnectionsReceiver extends RecursiveAction implements Closeable {
 
-    public interface MovementPropAdder {
-        void add (MovementProperties movementProperties) throws IOException;
-    }
-
     private ServerSocketChannel server;
     private ByteBuffer dataBuffer = ByteBuffer.allocate(AppProperties.getBufferLength());
     private ByteBuffer messageBuffer = ByteBuffer.allocate(Message.LENGTH);
     private boolean closed = false;
     private ObjectMapper objectMapper = new ObjectMapper();
-    private MovementPropAdder movementPropAdder;
+    private MovementPropListAdapter movementPropAdder;
 
-    public ConnectionsReceiver(MovementPropAdder movementPropAdder) {
+    public ConnectionsReceiver(MovementPropListAdapter movementPropAdder) {
         this.movementPropAdder = movementPropAdder;
     }
 
