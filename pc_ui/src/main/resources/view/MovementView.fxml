@@ -8,24 +8,24 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.local_movement.pc_ui.controllers.MovementViewController">
+<AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.local_movement.pc_ui.controllers.MovementViewController">
    <children>
-      <VBox layoutX="10.0" layoutY="10.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefWidth="600.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <VBox layoutX="10.0" layoutY="10.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="200.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <padding>
-            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
          </padding>
          <children>
-            <TableView fx:id="movementTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+            <TableView fx:id="movementTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="100.0">
                <columns>
                   <TableColumn fx:id="numberColumn" prefWidth="37.0" text="№" />
                   <TableColumn fx:id="fileNameColumn" prefWidth="128.0" text="File" />
                   <TableColumn fx:id="movementTypeColumn" prefWidth="133.0" text="Movement Type" />
-                  <TableColumn fx:id="sizeColumn" minWidth="0.0" prefWidth="89.0" text="Size" />
+                  <TableColumn fx:id="lengthColumn" minWidth="0.0" prefWidth="89.0" text="Size" />
                   <TableColumn fx:id="doneColumn" prefWidth="72.0" text="Done" />
                   <TableColumn fx:id="speedColumn" prefWidth="90.0" text="Speed" />
                </columns>
             </TableView>
-            <ButtonBar fx:id="movementBar" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity">
+            <ButtonBar fx:id="movementBar" maxHeight="-Infinity" maxWidth="1.7976931348623157E308">
                <buttons>
                   <Button fx:id="continueButton" mnemonicParsing="false" text="Continue" />
                   <Button fx:id="pauseButton" mnemonicParsing="false" text="Pause" />
