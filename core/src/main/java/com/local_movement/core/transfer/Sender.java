@@ -22,7 +22,6 @@ public class Sender extends RecursiveAction implements Closeable {
     private DialogInterface dialog;
     private String errorTitle = "Send file error";
 
-
     public Sender(MovementProperties movementProperties, DialogInterface dialog) {
         this.movementProperties = movementProperties;
         this.dialog = dialog;
@@ -53,6 +52,8 @@ public class Sender extends RecursiveAction implements Closeable {
                 dialog.error(errorTitle, header, null);
                 return;
             }
+
+            //todo отправка файла
 
             synchronized (this) {
                 this.wait(500);
