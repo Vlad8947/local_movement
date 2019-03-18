@@ -16,7 +16,7 @@ public class AppProperties {
     }
 
     @Getter private static final String title = "Local Movement";
-    @Getter private static int bufferLength = 1024;
+    @Getter private static int bufferLength = 8192;
     @Getter @Setter private static int port = 22022;
 
 }
