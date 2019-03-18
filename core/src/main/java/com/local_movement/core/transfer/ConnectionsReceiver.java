@@ -1,6 +1,10 @@
-package com.local_movement.core;
+package com.local_movement.core.transfer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.local_movement.core.*;
+import com.local_movement.core.model.FileProperties;
+import com.local_movement.core.model.MovementProperties;
+import com.local_movement.core.model.MovementType;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -13,18 +17,14 @@ import java.util.concurrent.RecursiveAction;
 
 public class ConnectionsReceiver extends RecursiveAction implements Closeable {
 
-    public interface MovementPropAdder {
-        void add (MovementProperties movementProperties) throws IOException;
-    }
-
     private ServerSocketChannel server;
     private ByteBuffer dataBuffer = ByteBuffer.allocate(AppProperties.getBufferLength());
     private ByteBuffer messageBuffer = ByteBuffer.allocate(Message.LENGTH);
     private boolean closed = false;
     private ObjectMapper objectMapper = new ObjectMapper();
-    private MovementPropAdder movementPropAdder;
+    private MovementPropListAdapter movementPropAdder;
 
-    public ConnectionsReceiver(MovementPropAdder movementPropAdder) {
+    public ConnectionsReceiver(MovementPropListAdapter movementPropAdder) {
         this.movementPropAdder = movementPropAdder;
     }
 
@@ -38,10 +38,9 @@ public class ConnectionsReceiver extends RecursiveAction implements Closeable {
                 SocketChannel socketChannel = server.accept();
                 try {
                     FileProperties fileProperties = receiveFileProperties(socketChannel);
-                    String address = ((InetSocketAddress) socketChannel.getRemoteAddress())
-                            .getAddress().getHostAddress();
+                    InetSocketAddress inetAddress = (InetSocketAddress) socketChannel.getRemoteAddress();
                     movementPropAdder.add(
-                            new MovementProperties(address, socketChannel, fileProperties, MovementType.RECEIVE)
+                            new MovementProperties(inetAddress, socketChannel, fileProperties, MovementType.RECEIVE)
                     );
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -60,8 +59,8 @@ public class ConnectionsReceiver extends RecursiveAction implements Closeable {
         int dataPosition;
 
         do {
-            message = SocketTransfer.clearReadGet(socketChannel, messageBuffer);
-            SocketTransfer.clearReadFlip(socketChannel, dataBuffer);
+            message = ChannelTransfer.clearReadGet(socketChannel, messageBuffer);
+            ChannelTransfer.clearReadFlip(socketChannel, dataBuffer);
             dataPosition = data.length;
             data = Arrays.copyOf(data, data.length + dataBuffer.limit());
             System.arraycopy(dataBuffer.array(), 0, data, dataPosition, dataBuffer.limit());
@@ -69,6 +68,23 @@ public class ConnectionsReceiver extends RecursiveAction implements Closeable {
         } while (!Arrays.equals(message, Message.END));
 
         return objectMapper.readValue(data, FileProperties.class);
+    }
+
+    public static void sendCancelConnectionMessage(MovementProperties movementProperties) {
+        new Thread(() -> {
+            ByteBuffer byteBuffer = ByteBuffer.allocate(Message.LENGTH);
+            SocketChannel socketChannel = movementProperties.getSocketChannel();
+            try {
+                if (socketChannel.isConnected()) {
+                    ChannelTransfer.clearFlipWrite(Message.CANCEL, socketChannel, byteBuffer);
+                }
+                if (socketChannel.isOpen()) {
+                    movementProperties.getSocketChannel().close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     @Override

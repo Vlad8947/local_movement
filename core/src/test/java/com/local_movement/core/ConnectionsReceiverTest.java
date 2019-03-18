@@ -1,6 +1,11 @@
 package com.local_movement.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.local_movement.core.model.FileProperties;
+import com.local_movement.core.model.MovementProperties;
+import com.local_movement.core.transfer.ConnectionsReceiver;
+import com.local_movement.core.transfer.Message;
+import com.local_movement.core.transfer.ChannelTransfer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,12 +23,22 @@ import static org.junit.jupiter.api.Assertions.*;
 class ConnectionsReceiverTest {
 
     private ConnectionsReceiver connectionsReceiver;
-    List<MovementProperties> movementList;
+    private List<MovementProperties> movementList;
+    private MovementPropListAdapter adder = new MovementPropListAdapter() {
+        @Override
+        public void add(MovementProperties movementProperties) throws IOException {
+            movementList.add(movementProperties);
+        }
+
+        @Override
+        public void remove(MovementProperties movementProperties) {
+            movementList.remove(movementProperties);
+        }
+    };
 
     @BeforeEach
     void setUp() {
         movementList = new ArrayList<>();
-        ConnectionsReceiver.MovementPropAdder adder = movementList::add;
         connectionsReceiver = new ConnectionsReceiver(adder);
     }
 
@@ -50,14 +65,14 @@ class ConnectionsReceiverTest {
             byte[] tempData;
 
             while ((data.length - dataPosition) > AppProperties.getBufferLength()) {
-                SocketTransfer.clearPutFlipWrite(Message.NONE, socketChannel, buffer);
+                ChannelTransfer.clearFlipWrite(Message.NONE, socketChannel, buffer);
                 tempData = Arrays.copyOfRange(data, dataPosition, dataPosition + AppProperties.getBufferLength());
-                SocketTransfer.clearPutFlipWrite(tempData, socketChannel, buffer);
+                ChannelTransfer.clearFlipWrite(tempData, socketChannel, buffer);
                 dataPosition += AppProperties.getBufferLength();
             }
-            SocketTransfer.clearPutFlipWrite(Message.END, socketChannel, buffer);
+            ChannelTransfer.clearFlipWrite(Message.END, socketChannel, buffer);
             tempData = Arrays.copyOfRange(data, dataPosition, data.length);
-            SocketTransfer.clearPutFlipWrite(tempData, socketChannel, buffer);
+            ChannelTransfer.clearFlipWrite(tempData, socketChannel, buffer);
 
             int first = 0;
             Object blockKey = new Object();
@@ -67,7 +82,6 @@ class ConnectionsReceiverTest {
                 }
             }
             FileProperties expectedFileProp = movementList.get(first).getFileProperties();
-            System.out.println(expectedFileProp);
             assertEquals(expectedFileProp, originalFileProp);
 
         } catch (IOException e) {

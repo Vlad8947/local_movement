@@ -1,4 +1,4 @@
-package com.local_movement.core.possible_network_interface;
+package com.local_movement.core.network;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;

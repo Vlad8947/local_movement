@@ -1,27 +1,18 @@
 package com.local_movement.pc_ui;
 
 import com.local_movement.core.AppProperties;
-import com.local_movement.pc_ui.controllers.MainViewController;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import lombok.Getter;
-import lombok.NonNull;
 
-import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 
 public class MainApp extends Application {
 
     @Getter private static MainApp instance;
-    private static Stage primaryStage;
-    private MainViewController mainViewController;
-    private ClassLoader classLoader = getClass().getClassLoader();
+    @Getter private static Stage primaryStage;
 
     public MainApp() {
     }
@@ -39,27 +30,10 @@ public class MainApp extends Application {
     }
 
     private void initScene() throws IOException {
-        Parent rootPane = loadMainView();
+        Parent rootPane = ViewLoader.loadView("view/MainView.fxml");
         Scene scene = new Scene(rootPane);
         primaryStage.setScene(scene);
         primaryStage.show();
-    }
-
-    private Parent loadMainView() throws IOException {
-        @NonNull URL mainViewUrl = classLoader.getResource("view/MainView.fxml");
-        FXMLLoader mainViewLoader = new FXMLLoader(mainViewUrl);
-        Parent rootPane = mainViewLoader.load();
-        mainViewController = mainViewLoader.getController();
-        return rootPane;
-    }
-
-    public Node loadView(String path) throws IOException {
-        @NonNull URL url = classLoader.getResource(path);
-        return FXMLLoader.load(url);
-    }
-
-    public static File chooseFile() {
-        return new FileChooser().showOpenDialog(primaryStage);
     }
 
 }

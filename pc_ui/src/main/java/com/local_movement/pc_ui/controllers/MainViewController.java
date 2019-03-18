@@ -1,12 +1,11 @@
 package com.local_movement.pc_ui.controllers;
 
-import com.local_movement.core.possible_network_interface.NetworkInterfaceFinder;
-import com.local_movement.pc_ui.MainApp;
+import com.local_movement.core.network.NetworkInterfaceFinder;
+import com.local_movement.pc_ui.ViewLoader;
 import com.local_movement.pc_ui.model.PossibleNetInterfaceModel;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -17,6 +16,8 @@ public class MainViewController {
 
     private ObservableList<PossibleNetInterfaceModel> interfaceList =
             FXCollections.observableArrayList();
+    private MovementViewController movementViewController;
+
     @FXML private TableView<PossibleNetInterfaceModel> interfaceTable;
     @FXML private TableColumn<PossibleNetInterfaceModel, String> interfaceNameColumn;
     @FXML private TableColumn<PossibleNetInterfaceModel, String> interfaceAddressColumn;
@@ -34,7 +35,7 @@ public class MainViewController {
     }
 
     private void initInterfaceTable() {
-        interfaceNameColumn.setCellValueFactory(cellData -> cellData.getValue().getName());
+        interfaceNameColumn.setCellValueFactory(cellData -> cellData.getValue().getNetInterfaceName());
         interfaceAddressColumn.setCellValueFactory(cellData -> cellData.getValue().getIp());
         updateInterfaceList();
         interfaceTable.setItems(interfaceList);
@@ -55,20 +56,17 @@ public class MainViewController {
 
     private void loadSendView() throws IOException {
         String path = "view/SendFileView.fxml";
-        Node sendView = MainApp.getInstance().loadView(path);
-        sendTab.setContent(sendView);
+        sendTab.setContent(ViewLoader.loadView(path));
     }
 
     private void loadReceiveView() throws IOException {
         String path = "view/ReceiveFileView.fxml";
-        Node view = MainApp.getInstance().loadView(path);
-        receiveTab.setContent(view);
+        receiveTab.setContent(ViewLoader.loadView(path));
     }
 
     private void loadMovementView() throws IOException {
         String path = "view/MovementView.fxml";
-        Node view = MainApp.getInstance().loadView(path);
-        movementTab.setContent(view);
+        movementTab.setContent(ViewLoader.loadView(path));
     }
 
 }
