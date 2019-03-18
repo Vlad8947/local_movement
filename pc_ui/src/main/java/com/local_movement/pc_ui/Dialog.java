@@ -7,15 +7,19 @@ import javafx.scene.control.TextInputDialog;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class Dialog implements DialogInterface {
 
     private static Dialog instance;
 
-    private Dialog(){}
+    private Dialog() {
+    }
 
     public static synchronized Dialog getInstance() {
-        if(instance == null) {
+        if (instance == null) {
             instance = new Dialog();
         }
         return instance;
@@ -32,23 +36,36 @@ public class Dialog implements DialogInterface {
 
     @Override
     public String textInput(String defaultText, String title, String header, String content)
-            throws NoSuchElementException {
-        TextInputDialog dialog = new TextInputDialog(defaultText);
-        dialog.setTitle(title);
-        dialog.setHeaderText(header);
-        dialog.setContentText(content);
-        Optional<String> result = dialog.showAndWait();
-        String text;
-        while (result.isPresent()) {
-            text = result.get();
-            if (!text.isEmpty()) {
-                return text;
+            throws NoSuchElementException, InterruptedException {
+
+        StringBuilder builder = new StringBuilder();
+        Platform.runLater(() -> {
+            TextInputDialog dialog = new TextInputDialog(defaultText);
+            dialog.setTitle(title);
+            dialog.setHeaderText(header);
+            dialog.setContentText(content);
+            Optional<String> optional = dialog.showAndWait();
+            String text;
+            while (optional.isPresent()) {
+                text = optional.get();
+                if (!text.isEmpty()) {
+                    builder.append(text);
+                    break;
+                }
+                dialog.setHeaderText("The field can not be empty! Enter again");
+                dialog.getEditor().setText(defaultText);
+                optional = dialog.showAndWait();
             }
-            dialog.setHeaderText("The field can not be empty! Enter again");
-            dialog.getEditor().setText(defaultText);
-            result = dialog.showAndWait();
+            synchronized (builder) {
+                builder.notify();
+            }
+        });
+        synchronized (builder) {
+            builder.wait();
         }
-        return null;
+        String result = builder.toString();
+        return result.isEmpty() ? null : result;
+
     }
 
     private void dialog(Alert.AlertType type, String title, String header, String content) {
