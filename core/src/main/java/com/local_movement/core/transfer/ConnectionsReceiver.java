@@ -59,8 +59,8 @@ public class ConnectionsReceiver extends RecursiveAction implements Closeable {
         int dataPosition;
 
         do {
-            message = SocketTransfer.clearReadGet(socketChannel, messageBuffer);
-            SocketTransfer.clearReadFlip(socketChannel, dataBuffer);
+            message = ChannelTransfer.clearReadGet(socketChannel, messageBuffer);
+            ChannelTransfer.clearReadFlip(socketChannel, dataBuffer);
             dataPosition = data.length;
             data = Arrays.copyOf(data, data.length + dataBuffer.limit());
             System.arraycopy(dataBuffer.array(), 0, data, dataPosition, dataBuffer.limit());
@@ -68,6 +68,23 @@ public class ConnectionsReceiver extends RecursiveAction implements Closeable {
         } while (!Arrays.equals(message, Message.END));
 
         return objectMapper.readValue(data, FileProperties.class);
+    }
+
+    public static void sendCancelConnectionMessage(MovementProperties movementProperties) {
+        new Thread(() -> {
+            ByteBuffer byteBuffer = ByteBuffer.allocate(Message.LENGTH);
+            SocketChannel socketChannel = movementProperties.getSocketChannel();
+            try {
+                if (socketChannel.isConnected()) {
+                    ChannelTransfer.clearFlipWrite(Message.CANCEL, socketChannel, byteBuffer);
+                }
+                if (socketChannel.isOpen()) {
+                    movementProperties.getSocketChannel().close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     @Override
