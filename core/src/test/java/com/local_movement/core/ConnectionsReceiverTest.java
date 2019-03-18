@@ -5,7 +5,7 @@ import com.local_movement.core.model.FileProperties;
 import com.local_movement.core.model.MovementProperties;
 import com.local_movement.core.transfer.ConnectionsReceiver;
 import com.local_movement.core.transfer.Message;
-import com.local_movement.core.transfer.SocketTransfer;
+import com.local_movement.core.transfer.ChannelTransfer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,14 +65,14 @@ class ConnectionsReceiverTest {
             byte[] tempData;
 
             while ((data.length - dataPosition) > AppProperties.getBufferLength()) {
-                SocketTransfer.clearPutFlipWrite(Message.NONE, socketChannel, buffer);
+                ChannelTransfer.clearFlipWrite(Message.NONE, socketChannel, buffer);
                 tempData = Arrays.copyOfRange(data, dataPosition, dataPosition + AppProperties.getBufferLength());
-                SocketTransfer.clearPutFlipWrite(tempData, socketChannel, buffer);
+                ChannelTransfer.clearFlipWrite(tempData, socketChannel, buffer);
                 dataPosition += AppProperties.getBufferLength();
             }
-            SocketTransfer.clearPutFlipWrite(Message.END, socketChannel, buffer);
+            ChannelTransfer.clearFlipWrite(Message.END, socketChannel, buffer);
             tempData = Arrays.copyOfRange(data, dataPosition, data.length);
-            SocketTransfer.clearPutFlipWrite(tempData, socketChannel, buffer);
+            ChannelTransfer.clearFlipWrite(tempData, socketChannel, buffer);
 
             int first = 0;
             Object blockKey = new Object();
