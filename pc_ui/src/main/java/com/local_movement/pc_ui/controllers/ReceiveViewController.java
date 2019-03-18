@@ -2,6 +2,7 @@ package com.local_movement.pc_ui.controllers;
 
 import com.local_movement.core.Converter;
 import com.local_movement.core.MovementPropListAdapter;
+import com.local_movement.core.transfer.ChannelTransfer;
 import com.local_movement.core.transfer.ConnectionsReceiver;
 import com.local_movement.core.model.MovementProperties;
 import com.local_movement.core.transfer.FileReceiver;
@@ -89,17 +90,22 @@ public class ReceiveViewController implements MovementPropListAdapter {
         updateFreeSpace();
     }
 
-    private void receiveFileAction() {
+    private MovementProperties getSelectionProperties() {
         int connectionIndex = connectionTable.getSelectionModel().getSelectedIndex();
-        MovementProperties movementProperties = connectionList.get(connectionIndex).getMovementProperties();
-        FileReceiver fileReceiver =
-                new FileReceiver(movementProperties, saveDirectory.getPath(), dialog,
-                        this, MovementViewController.getInstance());
-        fileReceiver.compute();
+        return connectionList.get(connectionIndex).getMovementProperties();
+    }
+
+    private void receiveFileAction() {
+        MovementProperties movementProperties = getSelectionProperties();
+        FileReceiver fileReceiver = new FileReceiver(movementProperties, saveDirectory.getPath(), dialog,
+                this, MovementViewController.getInstance());
+        fileReceiver.fork();
     }
 
     private void cancelConnectionAction() {
-
+        MovementProperties movementProperties = getSelectionProperties();
+        remove(movementProperties);
+        ConnectionsReceiver.sendCancelConnectionMessage(movementProperties);
     }
 
     private void connectionTableInit() {
