@@ -12,7 +12,7 @@ import java.nio.channels.SocketChannel;
 
 @Getter
 @EqualsAndHashCode
-@ToString
+@ToString(of = {"address", "fileProperties"})
 public class MovementProperties {
 
     private String address;
@@ -21,6 +21,7 @@ public class MovementProperties {
     @Setter private File file;
     private FileProperties fileProperties;
     private MovementType type;
+    @Setter private MovementStatus status = MovementStatus.MOVE;
 
     public MovementProperties(String address, File file, FileProperties fileProperties, MovementType type) {
         this.address = address;
