@@ -1,38 +1,75 @@
 package com.local_movement.pc_ui.controllers;
 
-import com.local_movement.core.MovementPropListAdapter;
 import com.local_movement.core.model.MovementProperties;
+import com.local_movement.pc_ui.MainApp;
+import com.local_movement.pc_ui.MovementPropListAdapterImpl;
+import com.local_movement.pc_ui.Updatable;
 import com.local_movement.pc_ui.model.MovementModel;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import lombok.Getter;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RecursiveAction;
 
-public class MovementViewController implements MovementPropListAdapter {
+public class MovementViewController {
 
-    @Getter private static MovementViewController instance;
+    @Getter
+    private static MovementPropListAdapterImpl<MovementModel> movementListAdapter =
+            new MovementPropListAdapterImpl<MovementModel>() {
+                @Override
+                public void add(MovementProperties movementProperties) throws IOException {
+                    list.add(new MovementModel(movementProperties));
+                }
+            };
 
-    private ObservableList<MovementModel> movementList =
-            FXCollections.observableArrayList();
+    @FXML
+    private TableView<MovementModel> movementTable;
+    @FXML
+    private TableColumn<MovementModel, Integer> numberColumn;
+    @FXML
+    private TableColumn<MovementModel, String> fileNameColumn;
+    @FXML
+    private TableColumn<MovementModel, String> movementTypeColumn;
+    @FXML
+    private TableColumn<MovementModel, String> lengthColumn;
+    @FXML
+    private TableColumn<MovementModel, String> doneColumn;
+    @FXML
+    private TableColumn<MovementModel, String> speedColumn;
 
-    @FXML private TableView<MovementModel> movementTable;
-    @FXML private TableColumn<MovementModel, Integer> numberColumn;
-    @FXML private TableColumn<MovementModel, String> fileNameColumn;
-    @FXML private TableColumn<MovementModel, String> movementTypeColumn;
-    @FXML private TableColumn<MovementModel, String> lengthColumn;
-    @FXML private TableColumn<MovementModel, String> doneColumn;
-    @FXML private TableColumn<MovementModel, String> speedColumn;
-
-    @FXML private ButtonBar movementBar;
-    @FXML private Button continueButton;
-    @FXML private Button pauseButton;
-    @FXML private Button cancelButton;
+    @FXML
+    private ButtonBar movementBar;
+    @FXML
+    private Button continueButton;
+    @FXML
+    private Button pauseButton;
+    @FXML
+    private Button cancelButton;
 
     public MovementViewController() {
-        instance = this;
+        Runnable statisticUpdater = new Runnable() {
+            private ObservableList<MovementModel> list = getMovementListAdapter().getList();
+            @Override
+            public void run() {
+                try {
+                    Object syncKey = new Object();
+                    while (true) {
+                        if(!list.isEmpty())
+                        synchronized (syncKey) {
+                            syncKey.wait(1000);
+                            list.forEach(prop -> prop.update());
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        MainApp.getExecutorService().submit(statisticUpdater);
     }
 
     @FXML
@@ -48,7 +85,7 @@ public class MovementViewController implements MovementPropListAdapter {
         lengthColumn.setCellValueFactory(cellData -> cellData.getValue().getFileLength());
         doneColumn.setCellValueFactory(cellData -> cellData.getValue().getDoneBytes());
         speedColumn.setCellValueFactory(cellData -> cellData.getValue().getSpeed());
-        movementTable.setItems(movementList);
+        movementTable.setItems(movementListAdapter.getList());
     }
 
     private void buttonBarInit() {
@@ -73,13 +110,4 @@ public class MovementViewController implements MovementPropListAdapter {
 
     }
 
-    @Override
-    public void add(MovementProperties movementProperties) throws IOException {
-        movementList.add(new MovementModel(movementProperties));
-    }
-
-    @Override
-    public void remove(MovementProperties movementProperties) {
-
-    }
 }

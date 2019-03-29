@@ -8,6 +8,8 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class AppProperties {
 
@@ -15,7 +17,7 @@ public class AppProperties {
         B, KB, MB, GB
     }
 
-    @Getter private static final String title = "Local Movement";
+    public static final String TITLE = "Local Movement";
     @Getter private static int bufferLength = 8192;
     @Getter @Setter private static int port = 22022;
 

@@ -1,16 +1,14 @@
 package com.local_movement.pc_ui.controllers;
 
 import com.local_movement.core.Converter;
-import com.local_movement.core.MovementPropListAdapter;
-import com.local_movement.core.transfer.ChannelTransfer;
 import com.local_movement.core.transfer.ConnectionsReceiver;
 import com.local_movement.core.model.MovementProperties;
 import com.local_movement.core.transfer.FileReceiver;
 import com.local_movement.pc_ui.Chooser;
 import com.local_movement.pc_ui.Dialog;
-import com.local_movement.pc_ui.model.ReceiveConnectionModel;
-import com.sun.istack.internal.NotNull;
-import javafx.collections.FXCollections;
+import com.local_movement.pc_ui.MainApp;
+import com.local_movement.pc_ui.MovementPropListAdapterImpl;
+import com.local_movement.pc_ui.model.ReceiveModel;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -20,9 +18,17 @@ import lombok.Getter;
 import java.io.File;
 import java.io.IOException;
 
-public class ReceiveViewController implements MovementPropListAdapter {
+public class ReceiveViewController {
 
-    @Getter private static ReceiveViewController instance;
+    @Getter
+    private static MovementPropListAdapterImpl<ReceiveModel> receiveListAdapter =
+            new MovementPropListAdapterImpl<ReceiveModel>() {
+                @Override
+                public void add(MovementProperties movementProperties) throws IOException {
+                    list.add(new ReceiveModel(movementProperties));
+                }
+            };
+    private ObservableList<ReceiveModel> receiveList = receiveListAdapter.getList();
 
     private File saveDirectory;
     private ConnectionsReceiver connectionsReceiver;
@@ -31,28 +37,41 @@ public class ReceiveViewController implements MovementPropListAdapter {
     private final String cancelReceiveConnectionsText = "Cancel receive connections";
 
     private Dialog dialog = Dialog.getInstance();
-    private ObservableList<ReceiveConnectionModel> connectionList = FXCollections.observableArrayList();
 
-    @FXML private Label saveDirectoryLabel;
-    @FXML private Button selectSaveDirectoryButton;
-    @FXML private Label freeSpaceLabel;
+    @FXML
+    private Label saveDirectoryLabel;
+    @FXML
+    private Button selectSaveDirectoryButton;
+    @FXML
+    private Label freeSpaceLabel;
 
-    @FXML private Button receiveConnectionsOrCancelButton;
-    @FXML private Label waitingLabel;
+    @FXML
+    private Button receiveConnectionsOrCancelButton;
+    @FXML
+    private Label waitingLabel;
 
-    @FXML private VBox chooseConnectionVBox;
-    @FXML private TableView<ReceiveConnectionModel> connectionTable;
-    @FXML private TableColumn<ReceiveConnectionModel, String> userNameColumn;
-    @FXML private TableColumn<ReceiveConnectionModel, String> addressColumn;
-    @FXML private TableColumn<ReceiveConnectionModel, String> fileNameColumn;
-    @FXML private TableColumn<ReceiveConnectionModel, String> sizeColumn;
+    @FXML
+    private VBox chooseConnectionVBox;
+    @FXML
+    private TableView<ReceiveModel> connectionTable;
+    @FXML
+    private TableColumn<ReceiveModel, String> userNameColumn;
+    @FXML
+    private TableColumn<ReceiveModel, String> addressColumn;
+    @FXML
+    private TableColumn<ReceiveModel, String> fileNameColumn;
+    @FXML
+    private TableColumn<ReceiveModel, String> sizeColumn;
 
-    @FXML private ButtonBar connectionBar;
-    @FXML private Button receiveFileButton;
-    @FXML private Button cancelConnButton;
+    @FXML
+    private ButtonBar connectionBar;
+    @FXML
+    private Button receiveFileButton;
+    @FXML
+    private Button cancelConnButton;
 
     public ReceiveViewController() {
-        instance = this;
+
     }
 
     @FXML
@@ -91,20 +110,19 @@ public class ReceiveViewController implements MovementPropListAdapter {
     }
 
     private MovementProperties getSelectionProperties() {
-        int connectionIndex = connectionTable.getSelectionModel().getSelectedIndex();
-        return connectionList.get(connectionIndex).getMovementProperties();
+        return connectionTable.getSelectionModel().getSelectedItem().getMovementProperties();
     }
 
     private void receiveFileAction() {
         MovementProperties movementProperties = getSelectionProperties();
         FileReceiver fileReceiver = new FileReceiver(movementProperties, saveDirectory.getPath(), dialog,
-                this, MovementViewController.getInstance());
-        fileReceiver.fork();
+                receiveListAdapter, MovementViewController.getMovementListAdapter());
+        MainApp.getExecutorService().execute(fileReceiver);
     }
 
     private void cancelConnectionAction() {
         MovementProperties movementProperties = getSelectionProperties();
-        remove(movementProperties);
+        receiveListAdapter.remove(movementProperties);
         ConnectionsReceiver.sendCancelConnectionMessage(movementProperties);
     }
 
@@ -113,12 +131,12 @@ public class ReceiveViewController implements MovementPropListAdapter {
         addressColumn.setCellValueFactory(cellData -> cellData.getValue().getAddress());
         fileNameColumn.setCellValueFactory(cellData -> cellData.getValue().getFileName());
         sizeColumn.setCellValueFactory(cellData -> cellData.getValue().getFileLength());
-        connectionTable.setItems(connectionList);
+        connectionTable.setItems(receiveList);
     }
 
     private void receiveConnectionsAction() {
-        connectionsReceiver = new ConnectionsReceiver(this);
-        connectionsReceiver.fork();
+        connectionsReceiver = new ConnectionsReceiver(receiveListAdapter);
+        MainApp.getExecutorService().execute(connectionsReceiver);
         receiveConnectionsPhase();
     }
 
@@ -135,20 +153,11 @@ public class ReceiveViewController implements MovementPropListAdapter {
     }
 
     private void notReceiveConnectionsPhase() {
-        connectionList.clear();
+        receiveList.clear();
         waitingLabel.setVisible(false);
         chooseConnectionVBox.setDisable(true);
         receiveConnectionsOrCancelButton.setText(receiveConnectionsText);
         receiveConnectionsOrCancelButton.setOnAction(event -> receiveConnectionsAction());
     }
 
-    @Override
-    public void add(MovementProperties movementProperties) throws IOException {
-        connectionList.add(new ReceiveConnectionModel(movementProperties));
-    }
-
-    @Override
-    public void remove(@NotNull MovementProperties movementProperties) {
-        connectionList.removeIf(t -> t.getMovementProperties().equals(movementProperties));
-    }
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.local_movement.core.*;
 import com.local_movement.core.model.MovementProperties;
 import com.local_movement.core.model.MovementStatus;
+import com.local_movement.core.view.DialogInterface;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import sun.nio.ch.Net;
@@ -16,11 +17,10 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
-import java.util.concurrent.RecursiveAction;
 
-public class Sender extends RecursiveAction implements Closeable {
+public class FileSender implements Runnable, Closeable {
 
-    private Logger logger = LogManager.getLogger(Sender.class);
+    private Logger logger = LogManager.getLogger(FileSender.class);
 
     private MovementProperties movementProperties;
     private ByteBuffer messageBuffer = ByteBuffer.allocate(Message.LENGTH);
@@ -29,27 +29,23 @@ public class Sender extends RecursiveAction implements Closeable {
     private DialogInterface dialog;
     private String errorTitle = "Send file error";
 
-    public Sender(MovementProperties movementProperties, DialogInterface dialog) {
+    public FileSender(MovementProperties movementProperties, DialogInterface dialog) {
         this.movementProperties = movementProperties;
         this.dialog = dialog;
     }
 
     @Override
-    protected void compute() {
+    public void run() {
         logger.info("Start");
         try (SocketChannel socketChannel = SocketChannel.open()) {
             this.socketChannel = socketChannel;
 
             if (!addressValid()) return;
-            logger.info("Connecting");
-            socketChannel.connect(movementProperties.getInetAddress());
+            connect();
             sendFileProperties();
             if (!accept()) return;
             sendFile();
-
-            //Finish message
-            logger.info("Wait finish message");
-            ChannelTransfer.clearRead(socketChannel, messageBuffer);
+            readFinishMessage();
 
         } catch (JsonProcessingException e) {
             String header = "Json processing error";
@@ -69,6 +65,48 @@ public class Sender extends RecursiveAction implements Closeable {
         }
     }
 
+    private boolean addressValid() {
+        try {
+            logger.info("Check address " + movementProperties.getAddress());
+            Net.checkAddress(movementProperties.getInetAddress());
+        } catch (IllegalArgumentException e) {
+            String header = "Invalid address: " + movementProperties.getAddress();
+            logger.warn(header);
+            dialog.error(errorTitle, header, null);
+            return false;
+        }
+        return true;
+    }
+
+    private void connect() throws IOException {
+        logger.info("Connecting");
+        socketChannel.connect(movementProperties.getInetAddress());
+    }
+
+    private void sendFileProperties() throws IOException {
+        logger.info("Send file properties");
+
+        byte[] data = new ObjectMapper().writeValueAsBytes(movementProperties.getFileProperties());
+        int dataPosition = 0;
+        byte[] tempData;
+
+        while ((data.length - dataPosition) >= AppProperties.getBufferLength()) {
+            tempData = Arrays.copyOfRange(data, dataPosition, dataPosition + AppProperties.getBufferLength());
+            ChannelTransfer.flipWriteWithMessage(Message.NONE, tempData, socketChannel, dataBuffer);
+            dataPosition += AppProperties.getBufferLength();
+        }
+        if ((data.length - dataPosition) > 0) {
+            logger.info("Send one_more message");
+            tempData = Arrays.copyOfRange(data, dataPosition, data.length);
+            ChannelTransfer.flipWriteWithMessage(Message.ONE_MORE, tempData, socketChannel, dataBuffer);
+
+        } else {
+            logger.info("Send end message");
+            ChannelTransfer.clearFlipWrite(Message.END, socketChannel, messageBuffer);
+        }
+
+    }
+
     private boolean accept() throws IOException {
         logger.info("Waiting accept message");
 
@@ -85,22 +123,10 @@ public class Sender extends RecursiveAction implements Closeable {
         return false;
     }
 
-    private boolean addressValid() {
-        try {
-            logger.info("Check address " + movementProperties.getAddress());
-            Net.checkAddress(movementProperties.getInetAddress());
-        } catch (IllegalArgumentException e) {
-            String header = "Invalid address: " + movementProperties.getAddress();
-            logger.warn(header);
-            dialog.error(errorTitle, header, null);
-            return false;
-        }
-        return true;
-    }
-
     private void sendFile() throws IOException {
         logger.info("Send file");
-        try (FileChannel fileChannel = FileChannel.open(movementProperties.getFile().toPath(), StandardOpenOption.READ);) {
+        try (FileChannel fileChannel =
+                     FileChannel.open(movementProperties.getFile().toPath(), StandardOpenOption.READ);) {
             while (ChannelTransfer.clearRead(fileChannel, dataBuffer) == AppProperties.getBufferLength()) {
                 if (movementProperties.getStatus().equals(MovementStatus.PAUSE)) {
                     //todo pause
@@ -109,8 +135,14 @@ public class Sender extends RecursiveAction implements Closeable {
                 ChannelTransfer.flipWriteWithMessage(socketChannel, messageBuffer, dataBuffer);
                 //todo listen a pause message
             }
-            ChannelTransfer.clearPut(messageBuffer, Message.END);
-            ChannelTransfer.flipWriteWithMessage(socketChannel, messageBuffer, dataBuffer);
+            if (dataBuffer.position() != 0) {
+                logger.info("Send one-more message");
+                ChannelTransfer.clearPut(messageBuffer, Message.ONE_MORE);
+                ChannelTransfer.flipWriteWithMessage(socketChannel, messageBuffer, dataBuffer);
+            } else {
+                logger.info("Send end message");
+                ChannelTransfer.clearFlipWrite(Message.END, socketChannel, messageBuffer);
+            }
 
         } catch (IOException e) {
             throw e;
@@ -119,20 +151,10 @@ public class Sender extends RecursiveAction implements Closeable {
         }
     }
 
-    private void sendFileProperties() throws IOException {
-        logger.info("Send file properties");
-
-        byte[] data = new ObjectMapper().writeValueAsBytes(movementProperties.getFileProperties());
-        int dataPosition = 0;
-        byte[] tempData;
-
-        while ((data.length - dataPosition) > AppProperties.getBufferLength()) {
-            tempData = Arrays.copyOfRange(data, dataPosition, dataPosition + AppProperties.getBufferLength());
-            ChannelTransfer.flipWriteWithMessage(Message.NONE, tempData, socketChannel, dataBuffer);
-            dataPosition += AppProperties.getBufferLength();
-        }
-        tempData = Arrays.copyOfRange(data, dataPosition, data.length);
-        ChannelTransfer.flipWriteWithMessage(Message.END, tempData, socketChannel, dataBuffer);
+    private void readFinishMessage() throws IOException {
+        //Finish message
+        logger.info("Wait finish message");
+        ChannelTransfer.clearRead(socketChannel, messageBuffer);
     }
 
     @Override

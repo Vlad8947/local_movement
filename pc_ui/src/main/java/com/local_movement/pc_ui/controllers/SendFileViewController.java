@@ -3,7 +3,7 @@ package com.local_movement.pc_ui.controllers;
 import com.local_movement.core.model.FileProperties;
 import com.local_movement.core.model.MovementProperties;
 import com.local_movement.core.model.MovementType;
-import com.local_movement.core.transfer.Sender;
+import com.local_movement.core.transfer.FileSender;
 import com.local_movement.pc_ui.Chooser;
 import com.local_movement.pc_ui.Dialog;
 import com.local_movement.pc_ui.MainApp;
@@ -59,8 +59,8 @@ public class SendFileViewController {
         FileProperties fileProperties = new FileProperties(userNameField.getText(), file.getName(), file.length());
         MovementProperties movementProperties =
                 new MovementProperties(addressField.getText(), file, fileProperties, MovementType.SEND);
-        Sender sender = new Sender(movementProperties, dialog);
-        sender.fork();
+        FileSender fileSender = new FileSender(movementProperties, dialog);
+        MainApp.getExecutorService().execute(fileSender);
     }
 
 }

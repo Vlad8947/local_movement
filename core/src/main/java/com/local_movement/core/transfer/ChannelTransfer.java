@@ -37,13 +37,15 @@ public class ChannelTransfer {
         flipWrite(channel, buffer);
     }
 
-    public static <T extends ByteChannel> void flipWriteWithMessage(byte[] message, byte[] data, T channel, ByteBuffer buffer)
+    public static <T extends ByteChannel> void flipWriteWithMessage(byte[] message, byte[] data, T channel,
+                                                                    ByteBuffer buffer)
             throws IOException {
         clearFlipWrite(message, channel, buffer);
         clearFlipWrite(data, channel, buffer);
     }
 
-    public static <T extends ByteChannel> void flipWriteWithMessage(T channel, ByteBuffer messageBuffer, ByteBuffer dataBuffer)
+    public static <T extends ByteChannel> void flipWriteWithMessage(T channel, ByteBuffer messageBuffer,
+                                                                    ByteBuffer dataBuffer)
             throws IOException{
         flipWrite(channel, messageBuffer);
         flipWrite(channel, dataBuffer);

@@ -31,7 +31,8 @@ public class MovementProperties {
         this.type = type;
     }
 
-    public MovementProperties(InetSocketAddress inetAddress, SocketChannel socketChannel, FileProperties fileProperties, MovementType type) {
+    public MovementProperties(InetSocketAddress inetAddress, SocketChannel socketChannel,
+                              FileProperties fileProperties, MovementType type) {
         this.inetAddress = inetAddress;
         address = inetAddress.getAddress().getHostAddress();
         this.socketChannel = socketChannel;

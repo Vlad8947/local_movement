@@ -1,4 +1,4 @@
-package com.local_movement.core;
+package com.local_movement.core.view;
 
 import com.local_movement.core.model.MovementProperties;
 

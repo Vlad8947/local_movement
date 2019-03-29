@@ -6,6 +6,7 @@ public class Message {
     public static final byte[] NONE = "non".getBytes();
     public static final byte[] PAUSE = "pau".getBytes();
     public static final byte[] MOVE = "mov".getBytes();
+    public static final byte[] ONE_MORE = "onm".getBytes();
     public static final byte[] END = "end".getBytes();
     public static final byte[] FINISH = "fin".getBytes();
     public static final byte[] ACCEPT = "acc".getBytes();

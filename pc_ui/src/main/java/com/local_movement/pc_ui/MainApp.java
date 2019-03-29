@@ -8,11 +8,22 @@ import javafx.stage.Stage;
 import lombok.Getter;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 public class MainApp extends Application {
 
     @Getter private static MainApp instance;
     @Getter private static Stage primaryStage;
+    @Getter private static ExecutorService executorService = Executors.newCachedThreadPool(new ThreadFactory() {
+        @Override
+        public Thread newThread(Runnable r) {
+            Thread thread = Executors.defaultThreadFactory().newThread(r);
+            thread.setDaemon(true);
+            return thread;
+        }
+    });
 
     public MainApp() {
     }
@@ -25,8 +36,13 @@ public class MainApp extends Application {
     public void start(Stage primaryStage) throws Exception {
         instance = this;
         MainApp.primaryStage = primaryStage;
-        MainApp.primaryStage.setTitle(AppProperties.getTitle());
+        MainApp.primaryStage.setTitle(AppProperties.TITLE);
         initScene();
+    }
+
+    @Override
+    public void stop() {
+        executorService.shutdown();
     }
 
     private void initScene() throws IOException {
