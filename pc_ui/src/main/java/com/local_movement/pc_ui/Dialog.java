@@ -1,15 +1,12 @@
 package com.local_movement.pc_ui;
 
-import com.local_movement.core.DialogInterface;
+import com.local_movement.core.view.DialogInterface;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextInputDialog;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class Dialog implements DialogInterface {
 

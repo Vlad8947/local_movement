@@ -20,15 +20,15 @@
          <children>
             <HBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" spacing="10.0">
                <children>
-                  <Label minWidth="-Infinity" text="Save directory:" />
-                  <Label fx:id="saveDirectoryLabel" text="None" underline="true" />
+                  <Label fx:id="saveDirLabel" minWidth="-Infinity" text="Save directory:" />
+                  <Label fx:id="pathLabel" text="None" underline="true" />
                   <Button fx:id="selectSaveDirectoryButton" minWidth="-Infinity" mnemonicParsing="false" text="Select" />
                </children>
             </HBox>
             <HBox alignment="TOP_CENTER" minHeight="-Infinity" minWidth="-Infinity" spacing="10.0">
                <children>
-                  <Label text="Free space on disc:" />
-                  <Label fx:id="freeSpaceLabel" text="None" />
+                  <Label fx:id="freeSpaceLabel" text="Free space on the disc:" />
+                  <Label fx:id="freeSpaceNumberLabel" text="None" />
                </children>
             </HBox>
             <HBox alignment="CENTER" spacing="10.0">
@@ -39,17 +39,17 @@
             </HBox>
             <VBox fx:id="chooseConnectionVBox" alignment="TOP_CENTER" spacing="10.0">
                <children>
-                  <Label text="Choose connection">
+                  <Label fx:id="chooseConnLabel" text="Choose connection">
                      <font>
                         <Font size="22.0" />
                      </font>
                   </Label>
                   <TableView fx:id="connectionTable" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
                      <columns>
-                        <TableColumn fx:id="userNameColumn" prefWidth="110.0" text="User netInterfaceName" />
+                        <TableColumn fx:id="userNameColumn" prefWidth="110.0" text="User name" />
                         <TableColumn fx:id="addressColumn" prefWidth="123.0" text="IP-address" />
-                        <TableColumn fx:id="fileNameColumn" prefWidth="157.0" text="File netInterfaceName" />
-                        <TableColumn fx:id="sizeColumn" minWidth="0.0" prefWidth="88.0" text="Size" />
+                        <TableColumn fx:id="fileNameColumn" prefWidth="157.0" text="File name" />
+                        <TableColumn fx:id="lengthColumn" prefWidth="88.0" text="Length" />
                      </columns>
                   </TableView>
                   <ButtonBar fx:id="connectionBar" prefHeight="40.0" prefWidth="200.0">
