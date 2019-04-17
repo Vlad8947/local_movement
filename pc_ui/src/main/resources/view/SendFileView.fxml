@@ -27,11 +27,11 @@
                   <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="SOMETIMES" />
                </rowConstraints>
                <children>
-                  <Label text="You'r username:" />
+                  <Label fx:id="userNameLabel" text="Your username:" />
                   <TextField fx:id="userNameField" maxHeight="-Infinity" maxWidth="-Infinity" promptText="roy1995" GridPane.columnIndex="1" />
-                  <Label text="Destination IP:" GridPane.rowIndex="1" />
+                  <Label fx:id="destinationIpLabel" text="Destination IP:" GridPane.rowIndex="1" />
                   <TextField fx:id="addressField" maxHeight="-Infinity" maxWidth="-Infinity" promptText="192.168.0.5" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-                  <Label text="File:" GridPane.rowIndex="2" />
+                  <Label fx:id="fileLabel" text="File:" GridPane.rowIndex="2" />
                   <HBox alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                      <children>
                         <Label fx:id="filePathLabel" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="-Infinity" text="None" underline="true" />

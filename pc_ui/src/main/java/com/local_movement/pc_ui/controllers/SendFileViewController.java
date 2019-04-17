@@ -14,16 +14,23 @@ import javafx.scene.control.TextField;
 
 import java.io.File;
 
+import static com.local_movement.core.AppProperties.Localisation.messages;
 
 public class SendFileViewController {
 
     private Dialog dialog = Dialog.getInstance();
     private File file;
 
+    @FXML private Label userNameLabel;
     @FXML private TextField userNameField;
+
+    @FXML private Label destinationIpLabel;
     @FXML private TextField addressField;
-    @FXML private Button selectFileButton;
+
+    @FXML private Label fileLabel;
     @FXML private Label filePathLabel;
+    @FXML private Button selectFileButton;
+
     @FXML private Button sendButton;
 
     public SendFileViewController() {
@@ -31,11 +38,25 @@ public class SendFileViewController {
 
     @FXML
     private void initialize() {
+        initSendForm();
+    }
+
+    private void initSendForm() {
+        initSendFormLabels();
         initButtons();
     }
 
+    private void initSendFormLabels() {
+        userNameLabel.setText(messages.getString("form.your_username"));
+        destinationIpLabel.setText(messages.getString("form.destination_ip"));
+        fileLabel.setText(messages.getString("form.file"));
+    }
+
     private void initButtons() {
+        selectFileButton.setText(messages.getString("select_file"));
         selectFileButton.setOnAction(event -> chooseFileAction());
+
+        sendButton.setText(messages.getString("send_file"));
         sendButton.setOnAction(event -> sendAction());
     }
 
@@ -59,7 +80,7 @@ public class SendFileViewController {
         FileProperties fileProperties = new FileProperties(userNameField.getText(), file.getName(), file.length());
         MovementProperties movementProperties =
                 new MovementProperties(addressField.getText(), file, fileProperties, MovementType.SEND);
-        FileSender fileSender = new FileSender(movementProperties, dialog);
+        FileSender fileSender = new FileSender(movementProperties, dialog, MovementViewController.getMovementListAdapter());
         MainApp.getExecutorService().execute(fileSender);
     }
 

@@ -1,6 +1,6 @@
 package com.local_movement.pc_ui.controllers;
 
-import com.local_movement.core.Converter;
+import com.local_movement.core.ByteFormatter;
 import com.local_movement.core.transfer.ConnectionsReceiver;
 import com.local_movement.core.model.MovementProperties;
 import com.local_movement.core.transfer.FileReceiver;
@@ -16,7 +16,8 @@ import javafx.scene.layout.VBox;
 import lombok.Getter;
 
 import java.io.File;
-import java.io.IOException;
+
+import static com.local_movement.core.AppProperties.Localisation.messages;
 
 public class ReceiveViewController {
 
@@ -24,26 +25,27 @@ public class ReceiveViewController {
     private static MovementPropListAdapterImpl<ReceiveModel> receiveListAdapter =
             new MovementPropListAdapterImpl<ReceiveModel>() {
                 @Override
-                public void add(MovementProperties movementProperties) throws IOException {
+                public void add(MovementProperties movementProperties) {
                     list.add(new ReceiveModel(movementProperties));
                 }
             };
     private ObservableList<ReceiveModel> receiveList = receiveListAdapter.getList();
 
-    private File saveDirectory;
+    private File saveFile;
     private ConnectionsReceiver connectionsReceiver;
-
-    private final String receiveConnectionsText = "Receive connections";
-    private final String cancelReceiveConnectionsText = "Cancel receive connections";
 
     private Dialog dialog = Dialog.getInstance();
 
     @FXML
-    private Label saveDirectoryLabel;
+    private Label saveDirLabel;
+    @FXML
+    private Label pathLabel;
     @FXML
     private Button selectSaveDirectoryButton;
     @FXML
     private Label freeSpaceLabel;
+    @FXML
+    private Label freeSpaceNumberLabel;
 
     @FXML
     private Button receiveConnectionsOrCancelButton;
@@ -53,6 +55,8 @@ public class ReceiveViewController {
     @FXML
     private VBox chooseConnectionVBox;
     @FXML
+    private Label chooseConnLabel;
+    @FXML
     private TableView<ReceiveModel> connectionTable;
     @FXML
     private TableColumn<ReceiveModel, String> userNameColumn;
@@ -61,7 +65,7 @@ public class ReceiveViewController {
     @FXML
     private TableColumn<ReceiveModel, String> fileNameColumn;
     @FXML
-    private TableColumn<ReceiveModel, String> sizeColumn;
+    private TableColumn<ReceiveModel, String> lengthColumn;
 
     @FXML
     private ButtonBar connectionBar;
@@ -78,25 +82,50 @@ public class ReceiveViewController {
     private void initialize() {
         saveDirectoryInit();
         notReceiveConnectionsPhase();
-        connectionTableInit();
-        buttonsInit();
+        chooseConnBoxInit();
+        buttonActionsInit();
     }
 
     private void saveDirectoryInit() {
-        saveDirectory = new File(System.getProperty("user.dir"));
-        saveDirectoryLabel.setText(saveDirectory.getPath());
-        updateFreeSpace();
+        saveFile = new File(System.getProperty("user.dir"));
+
+        saveDirLabel.setText(messages.getString("form.save_dir"));
+        pathLabel.setText(saveFile.getPath());
+        selectSaveDirectoryButton.setText(messages.getString("select"));
+        freeSpaceLabel.setText(messages.getString("form.free_space_on_the_disc"));
+
+        updateFreeSpaceNumber();
     }
 
-    private void updateFreeSpace() {
-        freeSpaceLabel.setText(
-                Converter.length(saveDirectory.getFreeSpace()));
+    private void chooseConnBoxInit() {
+        chooseConnLabel.setText(messages.getString("choose_connection"));
+        connectionTableInit();
+        receiveFileButton.setText(messages.getString("receive_file"));
+        cancelConnButton.setText(messages.getString("cancel_connection"));
     }
 
-    private void buttonsInit() {
+    private void connectionTableInit() {
+        userNameColumn.setText(messages.getString("user_name"));
+        addressColumn.setText(messages.getString("ip_address"));
+        fileNameColumn.setText(messages.getString("file_name"));
+        lengthColumn.setText(messages.getString("length"));
+
+        userNameColumn.setCellValueFactory(cellData -> cellData.getValue().getUserName());
+        addressColumn.setCellValueFactory(cellData -> cellData.getValue().getAddress());
+        fileNameColumn.setCellValueFactory(cellData -> cellData.getValue().getFileName());
+        lengthColumn.setCellValueFactory(cellData -> cellData.getValue().getFileLength());
+        connectionTable.setItems(receiveList);
+    }
+
+    private void buttonActionsInit() {
         selectSaveDirectoryButton.setOnAction(event -> selectSaveDirectoryAction());
         receiveFileButton.setOnAction(event -> receiveFileAction());
         cancelConnButton.setOnAction(event -> cancelConnectionAction());
+    }
+
+    private void updateFreeSpaceNumber() {
+        freeSpaceNumberLabel.setText(
+                ByteFormatter.length(saveFile.getFreeSpace()));
     }
 
     private void selectSaveDirectoryAction() {
@@ -104,9 +133,9 @@ public class ReceiveViewController {
         if (directory == null) {
             return;
         }
-        saveDirectory = directory;
-        saveDirectoryLabel.setText(directory.getPath());
-        updateFreeSpace();
+        saveFile = directory;
+        pathLabel.setText(directory.getPath());
+        updateFreeSpaceNumber();
     }
 
     private MovementProperties getSelectionProperties() {
@@ -115,7 +144,7 @@ public class ReceiveViewController {
 
     private void receiveFileAction() {
         MovementProperties movementProperties = getSelectionProperties();
-        FileReceiver fileReceiver = new FileReceiver(movementProperties, saveDirectory.getPath(), dialog,
+        FileReceiver fileReceiver = new FileReceiver(movementProperties, saveFile.getPath(), dialog,
                 receiveListAdapter, MovementViewController.getMovementListAdapter());
         MainApp.getExecutorService().execute(fileReceiver);
     }
@@ -124,14 +153,6 @@ public class ReceiveViewController {
         MovementProperties movementProperties = getSelectionProperties();
         receiveListAdapter.remove(movementProperties);
         ConnectionsReceiver.sendCancelConnectionMessage(movementProperties);
-    }
-
-    private void connectionTableInit() {
-        userNameColumn.setCellValueFactory(cellData -> cellData.getValue().getUserName());
-        addressColumn.setCellValueFactory(cellData -> cellData.getValue().getAddress());
-        fileNameColumn.setCellValueFactory(cellData -> cellData.getValue().getFileName());
-        sizeColumn.setCellValueFactory(cellData -> cellData.getValue().getFileLength());
-        connectionTable.setItems(receiveList);
     }
 
     private void receiveConnectionsAction() {
@@ -148,7 +169,8 @@ public class ReceiveViewController {
     private void receiveConnectionsPhase() {
         waitingLabel.setVisible(true);
         chooseConnectionVBox.setDisable(false);
-        receiveConnectionsOrCancelButton.setText(cancelReceiveConnectionsText);
+        receiveConnectionsOrCancelButton.setText(
+                messages.getString("cancel_receive_connections"));
         receiveConnectionsOrCancelButton.setOnAction(event -> cancelReceiveConnectionsAction());
     }
 
@@ -156,7 +178,8 @@ public class ReceiveViewController {
         receiveList.clear();
         waitingLabel.setVisible(false);
         chooseConnectionVBox.setDisable(true);
-        receiveConnectionsOrCancelButton.setText(receiveConnectionsText);
+        receiveConnectionsOrCancelButton.setText(
+                messages.getString("receive_connections"));
         receiveConnectionsOrCancelButton.setOnAction(event -> receiveConnectionsAction());
     }
 

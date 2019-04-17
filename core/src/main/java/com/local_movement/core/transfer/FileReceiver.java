@@ -1,6 +1,7 @@
 package com.local_movement.core.transfer;
 
 import com.local_movement.core.AppProperties;
+import com.local_movement.core.model.MovementStatus;
 import com.local_movement.core.view.DialogInterface;
 import com.local_movement.core.view.MovementPropListAdapter;
 import com.local_movement.core.model.MovementProperties;
@@ -14,8 +15,8 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.concurrent.RecursiveAction;
+
+import static com.local_movement.core.transfer.ChannelTransfer.*;
 
 public class FileReceiver implements Runnable, Closeable {
 
@@ -54,23 +55,27 @@ public class FileReceiver implements Runnable, Closeable {
                         "Enter file netInterfaceName");
                 if (fileName == null) {
                     logger.info("File name equals null, send CANCEL");
-                    ChannelTransfer.clearFlipWrite(Message.CANCEL, socketChannel, messageBuffer);
+                    clearPutFlipWriteFB(Message.CANCEL, socketChannel, messageBuffer);
                     return;
                 }
                 file = new File(directory, fileName);
             }
             movementProperties.setFile(file);
+            movementProperties.setStatus(MovementStatus.MOVE);
+            movementProperties.setCloseable(this);
             receiverListAdapter.remove(movementProperties);
             movementListAdapter.add(movementProperties);
             receiveFile();
 
+            if (!socketChannel.isOpen()) return;
             //Finish message
             logger.info("Write finish message");
-            ChannelTransfer.clearFlipWrite(Message.FINISH, socketChannel, messageBuffer);
+            clearPutFlipWriteFB(Message.FINISH, socketChannel, messageBuffer);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             logger.info("Finish");
+            movementProperties.setStatus(MovementStatus.FINISH);
             try {
                 close();
             } catch (IOException e) {
@@ -81,28 +86,26 @@ public class FileReceiver implements Runnable, Closeable {
 
     private void receiveFile() {
         logger.info("Receive file");
-        try (FileChannel fileChannel = FileChannel.open(movementProperties.getFile().toPath(), StandardOpenOption.APPEND)) {
-            ChannelTransfer.clearFlipWrite(Message.ACCEPT, socketChannel, messageBuffer);
+        try (FileChannel fileChannel =
+                     FileChannel.open(movementProperties.getFile().toPath(), StandardOpenOption.APPEND)) {
+            this.fileChannel = fileChannel;
+            clearPutFlipWriteFB(Message.CONFIRM, socketChannel, messageBuffer);
 
-            while (Arrays.equals(Message.NONE, ChannelTransfer.clearReadGet(socketChannel, messageBuffer))) {
-                dataBuffer.clear();
-                while (dataBuffer.hasRemaining()) {
-                    socketChannel.read(dataBuffer);
-                }
-                ChannelTransfer.flipWrite(fileChannel, dataBuffer);
-            }
-            if (Arrays.equals(Message.ONE_MORE, messageBuffer.array())) {
-                logger.info("Catch one_more message");
-                ChannelTransfer.clearRead(socketChannel, dataBuffer);
-                ChannelTransfer.flipWrite(fileChannel, dataBuffer);
+            long dataLength = movementProperties.getFileProperties().getFileLength();
+            long position = 0;
 
-            } else if (Arrays.equals(Message.END, messageBuffer.array())) {
-                logger.info("Catch end message");
+            while (position < dataLength-1) {
+                clearRead(socketChannel, dataBuffer);
+                flipWriteFB(fileChannel, dataBuffer);
+                position += dataBuffer.limit();
+                movementProperties.addDoneBytes(dataBuffer.limit());
             }
 
         } catch (IOException e) {
-            logger.warn(e);
-            e.printStackTrace();
+            if (socketChannel.isOpen()) {
+                logger.warn(e);
+                e.printStackTrace();
+            }
         }
         logger.info("End receive file");
     }

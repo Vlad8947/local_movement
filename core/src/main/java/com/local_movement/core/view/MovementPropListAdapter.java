@@ -6,8 +6,10 @@ import java.io.IOException;
 
 public interface MovementPropListAdapter {
 
-    void add (MovementProperties movementProperties) throws IOException;
+    void add (MovementProperties movementProperties);
 
     void remove(MovementProperties movementProperties);
+
+    boolean exist(MovementProperties movementProperties);
 
 }

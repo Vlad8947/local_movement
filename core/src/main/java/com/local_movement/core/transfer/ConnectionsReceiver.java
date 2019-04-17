@@ -15,8 +15,8 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Arrays;
-import java.util.concurrent.RecursiveAction;
+
+import static com.local_movement.core.transfer.ChannelTransfer.*;
 
 public class ConnectionsReceiver implements Runnable, Closeable {
 
@@ -61,26 +61,16 @@ public class ConnectionsReceiver implements Runnable, Closeable {
     private FileProperties receiveFileProperties(SocketChannel socketChannel) throws IOException {
         logger.info("Read file prop");
 
-        byte[] message;
-        byte[] data = new byte[0];
-        int dataPosition;
+        int dataLength = readInt(socketChannel, dataBuffer);
+        byte[] data = new byte[dataLength];
+        int dataPosition = 0;
 
-        while (Arrays.equals(Message.NONE, message = ChannelTransfer.clearReadGet(socketChannel, messageBuffer))) {
-            ChannelTransfer.clearReadFlip(socketChannel, dataBuffer);
-            dataPosition = data.length;
-            data = Arrays.copyOf(data, data.length + dataBuffer.limit());
+        do {
+            clearReadFlip(socketChannel, dataBuffer);
             System.arraycopy(dataBuffer.array(), 0, data, dataPosition, dataBuffer.limit());
-        }
-        if (Arrays.equals(Message.ONE_MORE, messageBuffer.array())) {
-            logger.info("Catch one-more message");
-            ChannelTransfer.clearReadFlip(socketChannel, dataBuffer);
-            dataPosition = data.length;
-            data = Arrays.copyOf(data, data.length + dataBuffer.limit());
-            System.arraycopy(dataBuffer.array(), 0, data, dataPosition, dataBuffer.limit());
+            dataPosition += dataBuffer.limit();
+        } while (dataPosition < dataLength-1);
 
-        } else if (Arrays.equals(Message.END, messageBuffer.array())) {
-            logger.info("Catch end message");
-        }
         return objectMapper.readValue(data, FileProperties.class);
     }
 
@@ -90,13 +80,15 @@ public class ConnectionsReceiver implements Runnable, Closeable {
             SocketChannel socketChannel = movementProperties.getSocketChannel();
             try {
                 if (socketChannel.isConnected()) {
-                    ChannelTransfer.clearFlipWrite(Message.CANCEL, socketChannel, byteBuffer);
+                    ChannelTransfer.clearPutFlipWriteFB(Message.CANCEL, socketChannel, byteBuffer);
                 }
                 if (socketChannel.isOpen()) {
                     movementProperties.getSocketChannel().close();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+            } finally {
+                byteBuffer.clear();
             }
         }).start();
     }

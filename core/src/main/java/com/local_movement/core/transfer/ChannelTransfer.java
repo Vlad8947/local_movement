@@ -6,18 +6,34 @@ import java.nio.channels.ByteChannel;
 
 public class ChannelTransfer {
 
-    public static <T extends ByteChannel> int clearRead(T channel, ByteBuffer buffer) throws IOException {
+    public static <T extends ByteChannel> void clearReadFB(T channel, ByteBuffer buffer) throws IOException {
         buffer.clear();
-        return channel.read(buffer);
+        while (buffer.hasRemaining()) {
+            channel.read(buffer);
+        }
+    }
+
+    public static <T extends ByteChannel> void clearRead(T channel, ByteBuffer buffer) throws IOException {
+        buffer.clear();
+        channel.read(buffer);
+    }
+
+    public static <T extends ByteChannel> void clearReadWithLimitFB(T channel, ByteBuffer buffer, int limit) throws IOException {
+        buffer.clear();
+        buffer.limit(limit);
+        while (buffer.hasRemaining()) {
+            channel.read(buffer);
+        }
     }
 
     public static <T extends ByteChannel> void clearReadFlip(T channel, ByteBuffer buffer) throws IOException {
-        clearRead(channel, buffer);
+        buffer.clear();
+        channel.read(buffer);
         buffer.flip();
     }
 
-    public static <T extends ByteChannel> byte[] clearReadGet(T channel, ByteBuffer buffer) throws IOException {
-        clearRead(channel, buffer);
+    public static <T extends ByteChannel> byte[] clearReadGetFB(T channel, ByteBuffer buffer) throws IOException {
+        clearReadFB(channel, buffer);
         return buffer.array();
     }
 
@@ -26,29 +42,29 @@ public class ChannelTransfer {
         buffer.put(data);
     }
 
-    public static <T extends ByteChannel> void flipWrite(T channel, ByteBuffer buffer) throws IOException {
+    public static <T extends ByteChannel> void flipWriteFB(T channel, ByteBuffer buffer) throws IOException {
         buffer.flip();
-        channel.write(buffer);
+        while (buffer.hasRemaining()) {
+            channel.write(buffer);
+        }
     }
 
-    public static <T extends ByteChannel> void clearFlipWrite(byte[] data, T channel, ByteBuffer buffer)
+    public static <T extends ByteChannel> void clearPutFlipWriteFB(byte[] data, T channel, ByteBuffer buffer)
             throws IOException {
         clearPut(buffer, data);
-        flipWrite(channel, buffer);
+        flipWriteFB(channel, buffer);
     }
 
-    public static <T extends ByteChannel> void flipWriteWithMessage(byte[] message, byte[] data, T channel,
-                                                                    ByteBuffer buffer)
-            throws IOException {
-        clearFlipWrite(message, channel, buffer);
-        clearFlipWrite(data, channel, buffer);
+    public static <T extends ByteChannel> void writeInt(T channel, ByteBuffer buffer, int number) throws IOException {
+        buffer.clear();
+        buffer.putInt(number);
+        flipWriteFB(channel, buffer);
     }
 
-    public static <T extends ByteChannel> void flipWriteWithMessage(T channel, ByteBuffer messageBuffer,
-                                                                    ByteBuffer dataBuffer)
-            throws IOException{
-        flipWrite(channel, messageBuffer);
-        flipWrite(channel, dataBuffer);
+    public static <T extends ByteChannel> int readInt(T channel, ByteBuffer buffer) throws IOException {
+        clearReadWithLimitFB(channel, buffer, Integer.BYTES);
+        buffer.flip();
+        return buffer.getInt();
     }
 
 }

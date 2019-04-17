@@ -3,7 +3,6 @@ package com.local_movement.pc_ui.controllers;
 import com.local_movement.core.model.MovementProperties;
 import com.local_movement.pc_ui.MainApp;
 import com.local_movement.pc_ui.MovementPropListAdapterImpl;
-import com.local_movement.pc_ui.Updatable;
 import com.local_movement.pc_ui.model.MovementModel;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -11,9 +10,8 @@ import javafx.scene.control.*;
 import lombok.Getter;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.RecursiveAction;
+
+import static com.local_movement.core.AppProperties.Localisation.messages;
 
 public class MovementViewController {
 
@@ -21,7 +19,7 @@ public class MovementViewController {
     private static MovementPropListAdapterImpl<MovementModel> movementListAdapter =
             new MovementPropListAdapterImpl<MovementModel>() {
                 @Override
-                public void add(MovementProperties movementProperties) throws IOException {
+                public void add(MovementProperties movementProperties) {
                     list.add(new MovementModel(movementProperties));
                 }
             };
@@ -29,26 +27,9 @@ public class MovementViewController {
     @FXML
     private TableView<MovementModel> movementTable;
     @FXML
-    private TableColumn<MovementModel, Integer> numberColumn;
-    @FXML
-    private TableColumn<MovementModel, String> fileNameColumn;
-    @FXML
-    private TableColumn<MovementModel, String> movementTypeColumn;
-    @FXML
-    private TableColumn<MovementModel, String> lengthColumn;
-    @FXML
-    private TableColumn<MovementModel, String> doneColumn;
-    @FXML
-    private TableColumn<MovementModel, String> speedColumn;
-
-    @FXML
     private ButtonBar movementBar;
     @FXML
-    private Button continueButton;
-    @FXML
-    private Button pauseButton;
-    @FXML
-    private Button cancelButton;
+    private Button deleteMovementButton;
 
     public MovementViewController() {
         Runnable statisticUpdater = new Runnable() {
@@ -79,35 +60,61 @@ public class MovementViewController {
     }
 
     private void movementTableInit() {
-        numberColumn.setCellValueFactory(cellData -> cellData.getValue().getNumber().asObject());
+        movementTable.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.intValue() == -1) {
+                movementBar.setDisable(true);
+                return;
+            }
+            movementBar.setDisable(false);
+        });
+        columnsInit();
+        movementTable.setItems(movementListAdapter.getList());
+    }
+
+    private void columnsInit() {
+        TableColumn<MovementModel, String> fileNameColumn, movementTypeColumn, lengthColumn, doneLengthColumn, statusColumn;
+
+        fileNameColumn = new TableColumn<>(messages.getString("file_name"));
+        movementTable.getColumns().add(fileNameColumn);
+
+        movementTypeColumn = new TableColumn<>(messages.getString("type"));
+        movementTable.getColumns().add(movementTypeColumn);
+
+        statusColumn = new TableColumn<>(messages.getString("status"));
+        movementTable.getColumns().add(statusColumn);
+
+        lengthColumn = new TableColumn<>(messages.getString("length"));
+        movementTable.getColumns().add(lengthColumn);
+
+        doneLengthColumn = new TableColumn<>(messages.getString("done"));
+        movementTable.getColumns().add(doneLengthColumn);
+
         fileNameColumn.setCellValueFactory(cellData -> cellData.getValue().getFileName());
         movementTypeColumn.setCellValueFactory(cellData -> cellData.getValue().getMovementType());
+        statusColumn.setCellValueFactory(cellData -> cellData.getValue().getStatus());
         lengthColumn.setCellValueFactory(cellData -> cellData.getValue().getFileLength());
-        doneColumn.setCellValueFactory(cellData -> cellData.getValue().getDoneBytes());
-        speedColumn.setCellValueFactory(cellData -> cellData.getValue().getSpeed());
-        movementTable.setItems(movementListAdapter.getList());
+        doneLengthColumn.setCellValueFactory(cellData -> cellData.getValue().getDoneBytes());
     }
 
     private void buttonBarInit() {
         movementBar.setDisable(true);
-        continueButton.setOnAction(event -> continueAction());
-        pauseButton.setOnAction(event -> pauseAction());
-        cancelButton.setOnAction(event -> cancelAction());
+        deleteMovementButton.setText(messages.getString("delete_movement"));
+        deleteMovementButton.setOnAction(event -> deleteMovementAction());
     }
 
     //todo
-    private void continueAction() {
-
+    private void deleteMovementAction() {
+        MovementModel movementModel = getSelectedModel();
+        try {
+            movementModel.getMovementProperties().close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        movementTable.getItems().remove(movementModel);
     }
 
-    //todo
-    private void pauseAction() {
-
-    }
-
-    //todo
-    private void cancelAction() {
-
+    private MovementModel getSelectedModel() {
+        return movementTable.getSelectionModel().getSelectedItem();
     }
 
 }
