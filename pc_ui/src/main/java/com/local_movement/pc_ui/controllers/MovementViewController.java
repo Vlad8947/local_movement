@@ -1,9 +1,10 @@
 package com.local_movement.pc_ui.controllers;
 
+import com.local_movement.core.AppProperties;
 import com.local_movement.core.model.MovementProperties;
-import com.local_movement.pc_ui.MainApp;
-import com.local_movement.pc_ui.MovementPropListAdapterImpl;
+import com.local_movement.core.view.MovementPropListAdapter;
 import com.local_movement.pc_ui.model.MovementModel;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -15,9 +16,12 @@ import static com.local_movement.core.AppProperties.Localisation.messages;
 
 public class MovementViewController {
 
+    private static ObservableList<MovementModel> movementList =
+            FXCollections.synchronizedObservableList(FXCollections.observableArrayList());
+
     @Getter
-    private static MovementPropListAdapterImpl<MovementModel> movementListAdapter =
-            new MovementPropListAdapterImpl<MovementModel>() {
+    private static MovementPropListAdapter<MovementModel> movementListAdapter =
+            new MovementPropListAdapter<MovementModel>(movementList) {
                 @Override
                 public void add(MovementProperties movementProperties) {
                     list.add(new MovementModel(movementProperties));
@@ -32,25 +36,24 @@ public class MovementViewController {
     private Button deleteMovementButton;
 
     public MovementViewController() {
-        Runnable statisticUpdater = new Runnable() {
-            private ObservableList<MovementModel> list = getMovementListAdapter().getList();
-            @Override
-            public void run() {
-                try {
-                    Object syncKey = new Object();
-                    while (true) {
-                        if(!list.isEmpty())
-                        synchronized (syncKey) {
-                            syncKey.wait(1000);
-                            list.forEach(prop -> prop.update());
-                        }
+        Runnable statisticUpdater = this::tableUpdater;
+        AppProperties.getExecutorService().execute(statisticUpdater);
+    }
+
+    private void tableUpdater() {
+        try {
+            Object syncKey = new Object();
+            while (true) {
+                if(!movementList.isEmpty()) {
+                    synchronized (syncKey) {
+                        syncKey.wait(1000);
+                        movementList.forEach(MovementModel::update);
                     }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 }
             }
-        };
-        MainApp.getExecutorService().submit(statisticUpdater);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -68,7 +71,7 @@ public class MovementViewController {
             movementBar.setDisable(false);
         });
         columnsInit();
-        movementTable.setItems(movementListAdapter.getList());
+        movementTable.setItems(movementList);
     }
 
     private void columnsInit() {
@@ -102,7 +105,6 @@ public class MovementViewController {
         deleteMovementButton.setOnAction(event -> deleteMovementAction());
     }
 
-    //todo
     private void deleteMovementAction() {
         MovementModel movementModel = getSelectedModel();
         try {

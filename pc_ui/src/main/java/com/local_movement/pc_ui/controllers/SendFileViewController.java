@@ -1,5 +1,6 @@
 package com.local_movement.pc_ui.controllers;
 
+import com.local_movement.core.AppProperties;
 import com.local_movement.core.model.FileProperties;
 import com.local_movement.core.model.MovementProperties;
 import com.local_movement.core.model.MovementType;
@@ -71,9 +72,10 @@ public class SendFileViewController {
 
     private void sendAction() {
         if (userNameField.getText().isEmpty() || addressField.getText().isEmpty() || file == null) {
-            String title = "Send file error";
-            String header = "The field(s) is empty!";
-            dialog.error(title, header, null);
+            String title = messages.getString("dialog.send_file_error");
+            String header = messages.getString("dialog.empty_fields");
+            String content = null;
+            dialog.error(title, header, content);
             return;
         }
 
@@ -81,7 +83,7 @@ public class SendFileViewController {
         MovementProperties movementProperties =
                 new MovementProperties(addressField.getText(), file, fileProperties, MovementType.SEND);
         FileSender fileSender = new FileSender(movementProperties, dialog, MovementViewController.getMovementListAdapter());
-        MainApp.getExecutorService().execute(fileSender);
+        AppProperties.getExecutorService().execute(fileSender);
     }
 
 }

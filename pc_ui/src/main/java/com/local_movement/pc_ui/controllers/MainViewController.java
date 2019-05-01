@@ -44,10 +44,12 @@ public class MainViewController {
     }
 
     private void initInterfaceTable() {
-        interfaceNameColumn.setText(messages.getString("interface_name"));
+        interfaceNameColumn.setText(
+                messages.getString("interface_name"));
         interfaceNameColumn.setCellValueFactory(cellData -> cellData.getValue().getNetInterfaceName());
 
-        interfaceAddressColumn.setText(messages.getString("your_ip"));
+        interfaceAddressColumn.setText(
+                messages.getString("your_ip"));
         interfaceAddressColumn.setCellValueFactory(cellData -> cellData.getValue().getIp());
 
         updateInterfaceList();

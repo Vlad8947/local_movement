@@ -1,14 +1,15 @@
 package com.local_movement.pc_ui.controllers;
 
+import com.local_movement.core.AppProperties;
 import com.local_movement.core.ByteFormatter;
 import com.local_movement.core.transfer.ConnectionsReceiver;
 import com.local_movement.core.model.MovementProperties;
 import com.local_movement.core.transfer.FileReceiver;
+import com.local_movement.core.view.MovementPropListAdapter;
 import com.local_movement.pc_ui.Chooser;
 import com.local_movement.pc_ui.Dialog;
-import com.local_movement.pc_ui.MainApp;
-import com.local_movement.pc_ui.MovementPropListAdapterImpl;
 import com.local_movement.pc_ui.model.ReceiveModel;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -16,20 +17,22 @@ import javafx.scene.layout.VBox;
 import lombok.Getter;
 
 import java.io.File;
+import java.rmi.server.RMIClassLoader;
 
 import static com.local_movement.core.AppProperties.Localisation.messages;
 
 public class ReceiveViewController {
 
+    private static ObservableList<ReceiveModel> receiveList = FXCollections.observableArrayList();
+
     @Getter
-    private static MovementPropListAdapterImpl<ReceiveModel> receiveListAdapter =
-            new MovementPropListAdapterImpl<ReceiveModel>() {
+    private static MovementPropListAdapter<ReceiveModel> receiveListAdapter =
+            new MovementPropListAdapter<ReceiveModel>(receiveList) {
                 @Override
                 public void add(MovementProperties movementProperties) {
                     list.add(new ReceiveModel(movementProperties));
                 }
             };
-    private ObservableList<ReceiveModel> receiveList = receiveListAdapter.getList();
 
     private File saveFile;
     private ConnectionsReceiver connectionsReceiver;
@@ -146,7 +149,7 @@ public class ReceiveViewController {
         MovementProperties movementProperties = getSelectionProperties();
         FileReceiver fileReceiver = new FileReceiver(movementProperties, saveFile.getPath(), dialog,
                 receiveListAdapter, MovementViewController.getMovementListAdapter());
-        MainApp.getExecutorService().execute(fileReceiver);
+        AppProperties.getExecutorService().execute(fileReceiver);
     }
 
     private void cancelConnectionAction() {
@@ -157,7 +160,7 @@ public class ReceiveViewController {
 
     private void receiveConnectionsAction() {
         connectionsReceiver = new ConnectionsReceiver(receiveListAdapter);
-        MainApp.getExecutorService().execute(connectionsReceiver);
+        AppProperties.getExecutorService().execute(connectionsReceiver);
         receiveConnectionsPhase();
     }
 

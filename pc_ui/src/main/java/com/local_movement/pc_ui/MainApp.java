@@ -16,14 +16,7 @@ public class MainApp extends Application {
 
     @Getter private static MainApp instance;
     @Getter private static Stage primaryStage;
-    @Getter private static ExecutorService executorService = Executors.newCachedThreadPool(new ThreadFactory() {
-        @Override
-        public Thread newThread(Runnable r) {
-            Thread thread = Executors.defaultThreadFactory().newThread(r);
-            thread.setDaemon(true);
-            return thread;
-        }
-    });
+
 
     public MainApp() {
     }
@@ -42,7 +35,7 @@ public class MainApp extends Application {
 
     @Override
     public void stop() {
-        executorService.shutdown();
+        AppProperties.getExecutorService().shutdown();
     }
 
     private void initScene() throws IOException {

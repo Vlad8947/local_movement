@@ -16,6 +16,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.file.StandardOpenOption;
 
+import static com.local_movement.core.AppProperties.Localisation.messages;
 import static com.local_movement.core.transfer.ChannelTransfer.*;
 
 public class FileReceiver implements Runnable, Closeable {
@@ -48,11 +49,13 @@ public class FileReceiver implements Runnable, Closeable {
         try {
             File file = new File(directory, movementProperties.getFileProperties().getFileName());
             logger.info("Create receive file");
+            String title = messages.getString("dialog.get_file_name.title");
+            String headerBeforeFileName = messages.getString("dialog.get_file_name.header.before_file_name");
+            String headerAfterFileName = messages.getString("dialog.get_file_name.header.after_file_name");
+            String content = messages.getString("dialog.get_file_name.content");
             while (!file.createNewFile()) {
                 String fileName = dialog.textInput(file.getName(),
-                        "Create file error", "A file named \"" + file.getName() +
-                                "\" already exists in the directory.",
-                        "Enter file netInterfaceName");
+                        title, headerAfterFileName + file.getName() + headerBeforeFileName, content);
                 if (fileName == null) {
                     logger.info("File name equals null, send CANCEL");
                     clearPutFlipWriteFB(Message.CANCEL, socketChannel, messageBuffer);

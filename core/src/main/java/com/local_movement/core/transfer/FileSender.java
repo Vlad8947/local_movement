@@ -21,6 +21,7 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
 import static com.local_movement.core.transfer.ChannelTransfer.*;
+import static com.local_movement.core.AppProperties.Localisation.messages;
 
 public class FileSender implements Runnable, Closeable {
 
@@ -32,7 +33,6 @@ public class FileSender implements Runnable, Closeable {
     private ByteBuffer messageBuffer = ByteBuffer.allocate(Message.LENGTH);
     private SocketChannel socketChannel;
     private DialogInterface dialog;
-    private String errorTitle = "Send file error";
 
     public FileSender(MovementProperties movementProperties, DialogInterface dialog, MovementPropListAdapter movementListAdapter) {
         this.movementProperties = movementProperties;
@@ -42,12 +42,13 @@ public class FileSender implements Runnable, Closeable {
 
     @Override
     public void run() {
+        String errorTitle = messages.getString("dialog.send_file_error");
         logger.info("Start");
         try (SocketChannel socketChannel = SocketChannel.open()) {
             this.socketChannel = socketChannel;
 
             if (!addressIsValid()) return;
-            if (addressIsUsed()) return;
+            if (addressIsUse()) return;
             movementProperties.setCloseable(this);
             connect();
             addTaskInMovementTable();
@@ -57,13 +58,13 @@ public class FileSender implements Runnable, Closeable {
             readFinishMessage();
 
         } catch (JsonProcessingException e) {
-            String header = "Json processing error";
+            String header = messages.getString("dialog.json_error");
             logger.warn(header);
             dialog.error(errorTitle, header, null);
         }
         catch (IOException e) {
             if (socketChannel.isOpen()) {
-                String header = "Connection error: " + movementProperties.toString();
+                String header = messages.getString("dialog.connection_error") + " " + movementProperties.toString();
                 logger.warn(header);
                 dialog.error(errorTitle, header, null);
             }
@@ -82,7 +83,8 @@ public class FileSender implements Runnable, Closeable {
             logger.info("Check address " + movementProperties.getAddress());
             Net.checkAddress(movementProperties.getInetAddress());
         } catch (IllegalArgumentException e) {
-            String header = "Invalid address: " + movementProperties.getAddress();
+            String errorTitle = messages.getString("dialog.send_file_error");
+            String header = messages.getString("dialog.invalid_address") + " " + movementProperties.getAddress();
             logger.warn(header);
             dialog.error(errorTitle, header, null);
             return false;
@@ -90,9 +92,14 @@ public class FileSender implements Runnable, Closeable {
         return true;
     }
 
-    private boolean addressIsUsed() {
-        if (movementListAdapter.exist(movementProperties)) {
-            dialog.error("This address is used!", "This address is used for send or receive a file. Wait until the transfer process is finish.", "");
+    private boolean addressIsUse() {
+        MovementProperties existProperties = movementListAdapter.get(movementProperties);
+        if (existProperties != null &&
+                existProperties.getStatus() != MovementStatus.FINISH) {
+            String title = messages.getString("dialog.address_valid.title");
+            String header = messages.getString("dialog.address_valid.header");
+            String content = null;
+            dialog.error(title, header, content);
             return true;
         }
         return false;

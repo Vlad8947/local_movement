@@ -27,7 +27,7 @@ public class MovementModel extends ViewModel<MovementModel> implements Updatable
         fileLength.setValue(ByteFormatter.length(movementProperties.getFileProperties().getFileLength()));
         speed.setValue(ByteFormatter.speedInSecond(0));
         movementType.setValue(movementProperties.getType().toString());
-        doneBytes.setValue(ByteFormatter.length(movementProperties.getFile().length()));
+        doneBytes.setValue(ByteFormatter.length(0));
     }
 
     @Override

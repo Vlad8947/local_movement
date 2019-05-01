@@ -8,6 +8,8 @@ import javafx.scene.control.TextInputDialog;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import static com.local_movement.core.AppProperties.Localisation.messages;
+
 public class Dialog implements DialogInterface {
 
     private static Dialog instance;
@@ -43,13 +45,14 @@ public class Dialog implements DialogInterface {
             dialog.setContentText(content);
             Optional<String> optional = dialog.showAndWait();
             String text;
+            String headerText = messages.getString("dialog.field_cant_be_empty");
             while (optional.isPresent()) {
                 text = optional.get();
                 if (!text.isEmpty()) {
                     builder.append(text);
                     break;
                 }
-                dialog.setHeaderText("The field can not be empty! Enter again");
+                dialog.setHeaderText(headerText);
                 dialog.getEditor().setText(defaultText);
                 optional = dialog.showAndWait();
             }
