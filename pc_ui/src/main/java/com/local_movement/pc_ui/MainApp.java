@@ -8,9 +8,6 @@ import javafx.stage.Stage;
 import lombok.Getter;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
 
 public class MainApp extends Application {
 
@@ -31,6 +28,7 @@ public class MainApp extends Application {
         MainApp.primaryStage = primaryStage;
         MainApp.primaryStage.setTitle(AppProperties.TITLE);
         initScene();
+        primaryStage.show();
     }
 
     @Override
@@ -42,7 +40,6 @@ public class MainApp extends Application {
         Parent rootPane = ViewLoader.loadView("view/MainView.fxml");
         Scene scene = new Scene(rootPane);
         primaryStage.setScene(scene);
-        primaryStage.show();
     }
 
 }

@@ -1,12 +1,8 @@
 package com.local_movement.core.view;
 
 import com.local_movement.core.model.MovementProperties;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import lombok.Getter;
 
-import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.List;
 

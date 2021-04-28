@@ -2,14 +2,13 @@ package com.local_movement.core.transfer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.local_movement.core.*;
+import com.local_movement.core.AppProperties;
 import com.local_movement.core.model.MovementProperties;
 import com.local_movement.core.model.MovementStatus;
 import com.local_movement.core.view.DialogInterface;
 import com.local_movement.core.view.MovementPropListAdapter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import sun.nio.ch.Net;
 
 import java.io.Closeable;
 import java.io.File;
@@ -20,8 +19,8 @@ import java.nio.channels.SocketChannel;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 
-import static com.local_movement.core.transfer.ChannelTransfer.*;
 import static com.local_movement.core.AppProperties.Localisation.messages;
+import static com.local_movement.core.transfer.ChannelTransfer.*;
 
 public class FileSender implements Runnable, Closeable {
 
@@ -81,7 +80,8 @@ public class FileSender implements Runnable, Closeable {
     private boolean addressIsValid() {
         try {
             logger.info("Check address " + movementProperties.getAddress());
-            Net.checkAddress(movementProperties.getInetAddress());
+            // todo Check inet address
+//            Net.checkAddress(movementProperties.getInetAddress());
         } catch (IllegalArgumentException e) {
             String errorTitle = messages.getString("dialog.send_file_error");
             String header = messages.getString("dialog.invalid_address") + " " + movementProperties.getAddress();

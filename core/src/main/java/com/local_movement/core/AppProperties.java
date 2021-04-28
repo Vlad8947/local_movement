@@ -23,16 +23,21 @@ public class AppProperties {
     }
 
     public static final String TITLE = "Local Movement";
-    @Getter private static int bufferLength = 8192;
-    @Getter @Setter private static int port = 22022;
+    @Getter
+    private static int bufferLength = 8192;
+    @Getter
+    @Setter
+    private static int port = 22022;
 
-    @Getter private static ExecutorService executorService = Executors.newCachedThreadPool(new ThreadFactory() {
-        @Override
-        public Thread newThread(Runnable r) {
-            Thread thread = Executors.defaultThreadFactory().newThread(r);
-            thread.setDaemon(true);
-            return thread;
-        }
-    });
+    @Getter
+    private static ExecutorService executorService =
+            Executors.newCachedThreadPool(new ThreadFactory() {
+                @Override
+                public Thread newThread(Runnable r) {
+                    Thread thread = Executors.defaultThreadFactory().newThread(r);
+                    thread.setDaemon(true);
+                    return thread;
+                }
+            });
 
 }
